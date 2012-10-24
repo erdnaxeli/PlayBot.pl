@@ -232,7 +232,6 @@ sub on_speak
 		my $sth = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) SELECT ?, user FROM playbot_codes WHERE nick = ?');
 		$sth->execute($1, $nick)
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-		$irc->yield(privmsg => $chan => 'Ok');
 
 		return;
 	}
