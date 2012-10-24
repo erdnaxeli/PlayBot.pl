@@ -162,7 +162,6 @@ sub on_notice
 	my ($user, $msg) = @_[ARG0, ARG2];	
 	my ($nick) = split(/!/,$user);
 
-	print $nick.' : '.$msg."\n";
 	return unless ($nick =~ /^NickServ$/i);
 
 	my $nickToVerify = shift @nicksToVerify;
