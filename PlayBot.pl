@@ -28,6 +28,8 @@ my $username = 'nightiies';
 my $channel = '#nightiies';
 my $admin = 'moise';
 my $baseurl = 'http://nightiies.iiens.net/links/';
+my @nicksToVerify;
+my @codesToVerify;
 
 my $debug = 0;
 
@@ -56,6 +58,7 @@ POE::Session->create(
 		irc_001    => \&on_connect,
 		irc_public => \&on_speak,
 		irc_msg    => \&on_query,
+		irc_notice => \&on_notice,
 		_flux	   => \&flux
 	},
 );
@@ -131,7 +134,7 @@ sub on_connect
 sub on_query
 {
 	my ($user,$msg) = @_[ARG0, ARG2];
-	$user = (split (/!/,$user))[0];
+	my ($nick) = split (/!/,$user);
 
 	if ($msg =~ m/^!/ && $user eq $admin) {
 		my $commande = ( $msg =~ m/^!([^ ]*)/ )[0]; 
@@ -142,6 +145,56 @@ sub on_query
 				$commandes_admin{$_}->(@params);
 				last;
 			}
+		}
+	}
+	elsif ($msg =~ /^PB/) {
+		# on vérifie si le nick est register
+		push (@nicksToVerify, $nick);
+		push (@codesToVerify, $msg);
+		$irc->yield(privmsg => $nick => 'Vérification en cours…');
+		$irc->yield(privmsg => nickserv =>  'info '.$nick);
+	}
+}
+
+
+sub on_notice
+{
+	my ($user, $msg) = @_[ARG0, ARG2];	
+	my ($nick) = split(/!/,$user);
+
+	print $nick.' : '.$msg."\n";
+	return unless ($nick =~ /^NickServ$/i);
+
+	my $nickToVerify = shift @nicksToVerify;
+	my $code = shift @codesToVerify;
+
+	return unless (defined($nickToVerify));
+	
+	if ($msg !~ /$nickToVerify/) {
+		push (@nicksToVerify, $nickToVerify);
+		push (@codesToVerify, $code);
+	}
+	elsif ($msg =~ /isn't registered/) {
+		$irc->yield(privmsg => $nickToVerify => "Il faut que ton pseudo soit enregistré auprès de NickServ");
+	}
+	else {
+		$log->info("ahahahah".$code);
+		my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE code = ?');
+		$log->error("Counldn't prepare querie; aborting") unless (defined $sth);
+		$sth->execute($code);
+
+		if ($sth->rows) {
+			my $sth = $dbh->prepare_cached('UPDATE playbot_codes SET nick = ? WHERE code = ?');
+			$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+			$sth->execute($nickToVerify, $code)
+				or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+			
+			$irc->yield(privmsg => $nickToVerify => 'Association effectuée');
+			$irc->yield(privmsg => $nickToVerify => 'pour enregistrer un lien dans tes favoris : !fav <id>');
+		}
+		else {
+			$irc->yield(privmsg => $nickToVerify => "Ce code n'existe pas");
 		}
 	}
 }
@@ -174,7 +227,15 @@ sub on_speak
 		my $url = $1;
 		eval { %content = zippy($url) };
 		$site = 'zippyshare';
-	}	
+	}
+	elsif ($msg =~ /!fav ([0-9]+)/) {
+		my $sth = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) SELECT ?, user FROM playbot_codes WHERE nick = ?');
+		$sth->execute($1, $nick)
+			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+		$irc->yield(privmsg => $chan => 'Ok');
+
+		return;
+	}
 	else {
 		return;
 	}
@@ -196,10 +257,10 @@ sub on_speak
 	}
 
 	if (defined $content{'author'}) {
-		$irc->yield(privmsg => $chan => $content{'title'}.' | '.$content{'author'}) ;
+		$irc->yield(privmsg => $chan => '['.$dbh->{mysql_insertid}.'] '.$content{'title'}.' | '.$content{'author'}) ;
 	}
 	else {
-		$irc->yield(privmsg => $chan => $content{'title'});
+		$irc->yield(privmsg => $chan => '['.$dbh->{mysql_insertid}.'] '.$content{'title'}) ;
 	}
 }
 
