@@ -135,8 +135,9 @@ sub on_query
 {
 	my ($user,$msg) = @_[ARG0, ARG2];
 	my ($nick) = split (/!/,$user);
+	print $msg."\n";
 
-	if ($msg =~ m/^!/ && $user eq $admin) {
+	if ($msg =~ m/^!/ && $nick eq $admin) {
 		my $commande = ( $msg =~ m/^!([^ ]*)/ )[0]; 
 		my @params = grep {!/^\s*$/} split(/\s+/, substr($msg, length("!$commande")));
 
@@ -254,11 +255,24 @@ sub on_speak
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 	}
 
+	# sélection de l'id de la vidéo insérée
+	my $id = $dbh->{mysql_insert_id};
+	if (!$id) {
+		my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
+		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+		$sth->execute($content{'url'})
+			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+		$id = $sth->fetch->[0];
+	}
+
+	# message sur irc
 	if (defined $content{'author'}) {
-		$irc->yield(privmsg => $chan => '['.$dbh->{mysql_insertid}.'] '.$content{'title'}.' | '.$content{'author'}) ;
+		$irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}.' | '.$content{'author'}) ;
 	}
 	else {
-		$irc->yield(privmsg => $chan => '['.$dbh->{mysql_insertid}.'] '.$content{'title'}) ;
+		$irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
 	}
 }
 
