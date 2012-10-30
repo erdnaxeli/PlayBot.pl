@@ -178,7 +178,6 @@ sub on_notice
 		$irc->yield(privmsg => $nickToVerify => "Il faut que ton pseudo soit enregistré auprès de NickServ");
 	}
 	else {
-		$log->info("ahahahah".$code);
 		my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE code = ?');
 		$log->error("Counldn't prepare querie; aborting") unless (defined $sth);
 		$sth->execute($code);
@@ -229,8 +228,17 @@ sub on_speak
 		$site = 'zippyshare';
 	}
 	elsif ($msg =~ /!fav ([0-9]+)/) {
-		my $sth = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) SELECT ?, user FROM playbot_codes WHERE nick = ?');
-		$sth->execute($1, $nick)
+		my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE nick = ?');
+		$sth->execute($nick)
+			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+		unless ($sth->rows) {
+			$irc->yield(privmsg => $nick => "Ce nick n'est associé à aucun login arise. Va sur http://nightiies.iiens.net/links/fav pour obtenir ton code personel.");
+			return;
+		}
+
+		my $sth2 = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) VALUES (?, ?)');
+		$sth2->execute($1, $sth->fetch->[0])
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
 		return;
