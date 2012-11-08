@@ -256,6 +256,8 @@ sub on_speak
 		$log->debug($content{'url'});
 	}
 	else {
+		# insertion de la vidéo dans la bdd
+
 		my $sth = $dbh->prepare_cached('INSERT INTO playbot (date, type, url, sender_irc, sender, title, chan) VALUES (NOW(),?,?,?,?,?,?)');
 		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
@@ -274,6 +276,18 @@ sub on_speak
 
 		$id = $sth->fetch->[0];
 	}
+
+
+	# insertion des éventuels tags
+	while ($msg =~ /#([a-zA-Z_-]*)/g) {
+		next if (!$1);
+		my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
+		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+		$sth->execute($id, $1)
+			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+	}
+
 
 	# message sur irc
 	if (defined $content{'author'}) {
