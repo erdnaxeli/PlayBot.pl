@@ -261,6 +261,7 @@ sub on_speak
 	elsif ($msg =~ /^!later( ([0-9]*)( in ([0-9]*)(h|m)?)?)?/) {
 		my ($id, $time, $unit) = ($2, $4, $5);
 
+		$time = 6 if (!$time);
 		$time *= ($unit eq 'm') ? 60 : 3600;
 		$kernel->delay_set('_later', $time, $nick, $id);
 
