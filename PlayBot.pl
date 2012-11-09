@@ -59,7 +59,8 @@ POE::Session->create(
 		irc_public => \&on_speak,
 		irc_msg    => \&on_query,
 		irc_notice => \&on_notice,
-		_flux	   => \&flux
+		_flux	   => \&flux,
+		_later     => \&later
 	},
 );
 
@@ -85,6 +86,20 @@ sub flux
 	}
 
 	$kernel->delay_set('_flux', 3600*24);
+}
+
+
+sub later
+{
+	my ($nick, $id) = @_[ARG0,ARG1];
+
+	my $sth = $dbh->prepare_cached('SELECT url FROM playbot WHERE id = ?');
+	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+	$sth->execute($id)
+		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+	$irc->yield(privmsg => $nick => $sth->fetch->[0]) if ($sth->rows);
 }
 
 
@@ -227,7 +242,7 @@ sub on_speak
 		eval { %content = zippy($url) };
 		$site = 'zippyshare';
 	}
-	elsif ($msg =~ /!fav ([0-9]+)/) {
+	elsif ($msg =~ /^!fav ([0-9]+)/) {
 		my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE nick = ?');
 		$sth->execute($nick)
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
@@ -240,6 +255,14 @@ sub on_speak
 		my $sth2 = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) VALUES (?, ?)');
 		$sth2->execute($1, $sth->fetch->[0])
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+		return;
+	}
+	elsif ($msg =~ /^!later( ([0-9]*)( in ([0-9]*)(h|m)?)?)?/) {
+		my ($id, $time, $unit) = ($2, $4, $5);
+
+		$time *= ($unit eq 'm') ? 60 : 3600;
+		$kernel->delay_set('_later', 3, $nick, $id);
 
 		return;
 	}
