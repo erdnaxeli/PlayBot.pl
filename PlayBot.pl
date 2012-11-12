@@ -30,6 +30,7 @@ my $admin = 'moise';
 my $baseurl = 'http://nightiies.iiens.net/links/';
 my @nicksToVerify;
 my @codesToVerify;
+my $lastID;
 
 my $debug = 0;
 
@@ -93,13 +94,18 @@ sub later
 {
 	my ($nick, $id) = @_[ARG0,ARG1];
 
-	my $sth = $dbh->prepare_cached('SELECT url FROM playbot WHERE id = ?');
+	my $sth = $dbh->prepare_cached('SELECT url, sender, title FROM playbot WHERE id = ?');
 	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
 	$sth->execute($id)
 		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
-	$irc->yield(privmsg => $nick => $sth->fetch->[0]) if ($sth->rows);
+	if ($sth->rows) {
+		my @donnees = $sth->fetchrow_array;
+
+		$irc->yield(privmsg => $nick => '['.$id.'] '.$donnees[2].' | '.$donnees[1]);
+		$irc->yield(privmsg => $nick => $donnees[0]);
+	}
 }
 
 
@@ -227,7 +233,7 @@ sub on_speak
 		eval { %content = youtube($url) };
 		$site = 'youtube';
 	}
-	elsif ($msg =~ m#(^|[^!])https?://soundcloud.com/([a-zA-Z0-9-]+/[a-zA-Z0-9-]+)#) {
+	elsif ($msg =~ m#(^|[^!])https?://soundcloud.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)#) {
 		my $url = 'https://www.soundcloud.com/'.$2;
 		eval { %content = soundcloud($url) };
 		$site = 'soundcloud';
@@ -242,7 +248,9 @@ sub on_speak
 		eval { %content = zippy($url) };
 		$site = 'zippyshare';
 	}
-	elsif ($msg =~ /^!fav ([0-9]+)/) {
+	elsif ($msg =~ /^!fav( ([0-9]+))?/) {
+		my $id = ($2) ? $2 : $lastID;
+
 		my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE nick = ?');
 		$sth->execute($nick)
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
@@ -253,7 +261,7 @@ sub on_speak
 		}
 
 		my $sth2 = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) VALUES (?, ?)');
-		$sth2->execute($1, $sth->fetch->[0])
+		$sth2->execute($id, $sth->fetch->[0])
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
 		return;
@@ -261,6 +269,7 @@ sub on_speak
 	elsif ($msg =~ /^!later( ([0-9]*)( in ([0-9]*)(h|m)?)?)?/) {
 		my ($id, $time, $unit) = ($2, $4, $5);
 
+		$id = $lastID if (!$id);
 		$time = 6 if (!$time);
 		$time *= ($unit eq 'm') ? 60 : 3600;
 		$kernel->delay_set('_later', $time, $nick, $id);
@@ -300,10 +309,11 @@ sub on_speak
 
 		$id = $sth->fetch->[0];
 	}
+	$lastID = $id;
 
 
 	# insertion des éventuels tags
-	while ($msg =~ /#([a-zA-Z_-]*)/g) {
+	while ($msg =~ /#([a-zA-Z0-9_-]*)/g) {
 		next if (!$1);
 		my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
 		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
