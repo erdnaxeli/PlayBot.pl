@@ -1,71 +1,31 @@
 package soundcloud;
 
 use LWP::UserAgent;
-use HTML::Parser;
-use HTML::Entities;
+use JSON;
 
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(soundcloud);
 
 
-my $inTitle = 0;
-my $inAuthor = 0;
-my %infos;
+my $root = 'http://api.soundcloud.com';
+my $clientId = 'f4956716fe1a9dc9c3725af822963365';
 
 
 sub soundcloud {
 	my ($url) = @_;
 
-	my $ua = LWP::UserAgent->new(
-		agent   => "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13 GTB7.1",
-		timeout => 30
-	);
+	my $ua = LWP::UserAgent->new(timeout => 30);
 
-	my $response = $ua->get($url);
+	my $response = $ua->get($root.'/resolve.json?url='.$url.'&client_id='.$clientId);
 	die($response->status_line) unless ($response->is_success);
 
-	my $content = $response->decoded_content;
-
-	my $parser = HTML::Parser->new();
-	$parser->handler(text => \&parser_text, 'text');
-	$parser->handler(start => \&parser_start, 'tagname');
-	$parser->handler(end => \&parser_end, 'tagname');
-	$parser->unbroken_text(1);
-	$parser->report_tags('title', 'a');
-	$parser->parse($content);
-	$parser->eof();
-	
+	$content = decode_json($response->decoded_content);
+	$infos{'title'} = $content->{'title'};
+	$infos{'author'} = $content->{'user'}->{'username'};
 	$infos{'url'} = $url;
 	
 	return %infos;
-}
-
-sub parser_text
-{
-	my ($text) = @_;
-	chomp $text;
-	$text = decode_entities($text);
-
-	if ($inTitle) {
-		$text =~ s/\n//;
-		$text =~ s/ on SoundCloud.*//;
-		$text =~ s/^ *//;
-		$text =~ s/[^a-zA-Z0-9\(\)\[\]]*$//;
-		($infos{'title'}, $infos{'author'}) = split (' by ', $text);
-	}
-}
-
-sub parser_start
-{
-	my ($tag) = @_;
-	$inTitle = 1 if ($tag eq 'title');
-}
-
-sub parser_end
-{
-	my ($tag) = @_;
-	$inTitle = 0 if ($tag eq 'title');
 }
 
 1;
