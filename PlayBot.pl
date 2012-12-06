@@ -25,7 +25,7 @@ my $nick = 'PlayBot';
 my $port = 6667;
 my $ircname = 'nightiies';
 my $username = 'nightiies';
-my $channel = '#nightiies';
+my @channels = qw(#nightiies #bigphatsubwoofer);
 my $admin = 'moise';
 my $baseurl = 'http://nightiies.iiens.net/links/';
 my @nicksToVerify;
@@ -36,7 +36,7 @@ my $debug = 0;
 
 # mode debug
 if ($#ARGV + 1) {
-	$channel = "#hormone";
+	@channels = qw(#hormone);
 	$nick = 'kikoo';
 	$debug = 1;
 }
@@ -83,7 +83,7 @@ sub flux
 	my ($nbr) = $sth->fetchrow_array;
 
 	if ($nbr) {
-		$irc->yield(privmsg => $channel => $nbr.' liens aujourd\'hui : '.$baseurl.$date);
+		$irc->yield(privmsg => $_ => $nbr.' liens aujourd\'hui : '.$baseurl.$date) foreach (@channels);
 	}
 
 	$kernel->delay_set('_flux', 3600*24);
@@ -141,7 +141,7 @@ sub bot_start {
 sub on_connect
 {
 	my $kernel = $_[ KERNEL ];
-	$irc->yield(join => $channel);
+	$irc->yield(join => $_) foreach (@channels);
 	$log->info('connected');
 	
 	my $hour = strftime ('%H', localtime);
@@ -181,7 +181,7 @@ sub on_query
 
 sub on_notice
 {
-	my ($user, $msg) = @_[ARG0, ARG2];	
+	my ($user, $msg) = @_[ARG0, ARG2];
 	my ($nick) = split(/!/,$user);
 
 	return unless ($nick =~ /^NickServ$/i);
@@ -316,6 +316,11 @@ sub on_speak
 	# insertion des éventuels tags
 	while ($msg =~ /#([a-zA-Z0-9_-]*)/g) {
 		next if (!$1);
+		if ($debug) {
+			$log->debug($1);
+			next;
+		}
+
 		my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
 		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
