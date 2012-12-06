@@ -24,6 +24,10 @@ sub soundcloud {
 	$infos{'title'} = $content->{'title'};
 	$infos{'author'} = $content->{'user'}->{'username'};
 	$infos{'url'} = $url;
+
+	if ($content->{'downloadable'}) {
+		$infos{'ddl'} = $content->{'download_url'};
+	}
 	
 	return %infos;
 }
