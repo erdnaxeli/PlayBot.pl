@@ -6,6 +6,7 @@ use POE::Component::IRC;
 use POSIX 'strftime';
 use DBI;
 use Tie::File;
+use JSON;
 
 use Logging;
 use youtube;
@@ -42,9 +43,15 @@ if ($#ARGV + 1) {
 }
 
 
+local $/;
+open CONF, '<', 'playbot.conf';
+my $json = <CONF>;
+my $conf = decode_json($json);
+
+
 ## CONNEXION 
 my ($irc) = POE::Component::IRC->spawn();
-my $dbh = DBI->connect('DBI:mysql:assoce_nightiies;host=mysql.iiens.net', 'assoce_nightiies', 'POiREAU.jKNCFfBRq', {
+my $dbh = DBI->connect('DBI:mysql:'.$conf->{'bdd'}.';host='.$conf->{'host'}, $conf->{'user'}, $conf->{'passwd'}, {
 	        PrintError => 0,
 	        AutoCommit => 1,
 		mysql_auto_reconnect => 1
