@@ -48,6 +48,8 @@ Le reste de la configuration s'effectue encore directement dans le fichier *Play
 
 Les noms des variables sont plutôt explicites. *$admin* contient le nick du l'utilisateur qui aura le droit d'administrer le bot (attention, aucune vérification autre que le nick n'est pour l'instant faîte, il est recommandé de l'enregistrer). *$baseurl* contient l'url racine du site permettant de consulter le contenu de la base de données.
 
+Les schémas des tables nécéssaire pour la base de données sont dans le fichier *bdd.sql*.
+
 
 ## Utilisation
 
