@@ -55,6 +55,9 @@ Les schémas des tables nécéssaire pour la base de données sont dans le fichi
 
 Dès qu'un lien est posté, le bot récupère le nom du contenu et de la personne l'ayant posté, et l'insère dans la base de données (grâce à l'unicité du lien et à sa normalisation, un même contenu ne peut être enregistré deux fois). Il poste ensuite sur le channel les informations récupérées avec l'id du contenu.
 
+Lors du poste du lien, on peut ajouter des tags en les préfixant par le symbole « # ».
+
 Les différentes commandes utilisables sont les suivantes sur le channel où se trouve le PlayBot :
 + !fav [id] : enregistre en favoris le contenu possédant l'identifiant *id*. Si l'identifiant n'est pas préciser, le dernier contenu posté (et non inséré) est utilisé.
 + !later [id [in [Xs|Xm|Xs]]] : demande au PlayBot de rappeler en query un contenu. La durée par défaut est de 6h. Si l'identifant n'est pas précisé, le dernier contenu posté est utilisé.
++ !tag [id] #tag1 #tag2 … : permet de taguer un contenu.
