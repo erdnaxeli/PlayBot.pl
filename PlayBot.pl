@@ -301,6 +301,8 @@ sub on_speak
         while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
             addTag($id, $1);
         }
+
+        return;
     }
 	else {
 		return;
