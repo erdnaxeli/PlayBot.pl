@@ -296,6 +296,12 @@ sub on_speak
 
 		return;
 	}
+    elsif ($msg =~ /^!tag( +([0-9]+))?/) {
+        my $id = ($2) ? $2 : $lastID;
+        while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
+            addTag($id, $1);
+        }
+    }
 	else {
 		return;
 	}
@@ -333,8 +339,7 @@ sub on_speak
 
 
 	# insertion des éventuels tags
-	while ($msg =~ /#([a-zA-Z0-9_-]*)/g) {
-		next if (!$1);
+	while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
 		if ($debug) {
 			$log->debug($1);
 			next;
