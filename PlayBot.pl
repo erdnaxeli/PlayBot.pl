@@ -97,6 +97,18 @@ sub flux
 }
 
 
+sub addTag
+{
+    my ($id, $tag) = @_;
+
+    my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
+	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+	$sth->execute($id, $tag)
+		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+}
+	
+
 sub later
 {
 	my ($nick, $id) = @_[ARG0,ARG1];
@@ -328,12 +340,8 @@ sub on_speak
 			next;
 		}
 
-		my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
-		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-		$sth->execute($id, $1)
-			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-	}
+        addTag ($lastID, $1);
+    }
 
 
 	# message sur irc
