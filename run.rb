@@ -3,8 +3,7 @@
 require 'logger'
 require 'optparse'
 
-$LOAD_PATH << './lib'
-require 'playbot'
+require_relative 'lib/playbot'
 
 # This code start the PlayBot with somes options.
 
