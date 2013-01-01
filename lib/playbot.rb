@@ -38,7 +38,7 @@ class PlayBot < IRCBot
 			@nick_paswd = options.delete[:nick_passwd]
 		end
 
-		options[:username] = BOTNAME
+        options[:username] = BOTNAME
 		options[:realname] = BOTNAME
 
         super(options)
@@ -73,7 +73,6 @@ class PlayBot < IRCBot
         return if event.pm?
 
         url = URI.extract(event.message, ['http', 'https']).first
-        puts "url = #{url}"
         
         handler = SitePlugin.for_site(url)
         return if handler.nil?
@@ -81,6 +80,7 @@ class PlayBot < IRCBot
         handler = handler.new
         content = handler.get(url)
 
-        #TODO: use this content...
+        msg(event.channel, "#{content[:title]} | #{content[:author]}")
+        end
     end
 end
