@@ -17,8 +17,14 @@ class SitePlugin
         @@repository.find { |handler| handler.can_handle? site }
     end
 
-    # A place holder method. This method *must* be implemented in the subclasses.
-    def can_handle?(site)
-        raise "Method not implemented !"
+    # Raise an error message if the missing method should have been implemented
+    # in the subclasse. This possible methode are:
+    # * <tt>#can_handle?</tt>
+    # * <tt>#get</tt>
+    #
+    #  They *must* be implemented by the subclasse.
+    def method_missing(method)
+        return unless ['can_handle?', 'get'].include(method)
+        raise "Method #{method} not implemented !"
     end
 end
