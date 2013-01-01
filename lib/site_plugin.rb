@@ -14,7 +14,7 @@ class SitePlugin
 
     # Return the plugin that can handle a given site.
     def self.for_site(site)
-        @@repository.find {|handler| handler.can_handle? site }
+        @@repository.find { |handler| handler.can_handle? site }
     end
 
     # A place holder method. This method *must* be implemented in the subclasses.

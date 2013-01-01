@@ -1,5 +1,4 @@
-$LOAD_PATH << '../lib'
-require 'site_plugin'
+require_relative '../lib/site_plugin.rb'
 
 describe SitePlugin do
     describe 'inherance' do
@@ -23,6 +22,13 @@ describe SitePlugin do
             end
 
             SitePlugin.for_site('OfCourseICanHandle_test_').nil?.should be_false
+        end
+    end
+
+    describe '#can_handle?' do
+        it 'raise an exception' do
+            @siteplugin = SitePlugin.new
+            lambda { @siteplugin.can_handle?('test') }.should raise_error
         end
     end
 end
