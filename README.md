@@ -7,6 +7,7 @@ Cette branche a pour but la réécriture du PlayBot en ruby. Avec cette réécri
 Les dépendances nécéssaires sont :
  * net-yail
  * rspec
+ * youtube\_it
 
 
 
