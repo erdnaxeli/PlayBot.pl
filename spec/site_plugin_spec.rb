@@ -14,7 +14,7 @@ describe SitePlugin do
     end
 
     describe '.for_site' do
-        it 'return plugin that can handle a given site"' do
+        it 'return plugin that can handle a given site' do
             class TestPlugin2 < SitePlugin
                 def self.can_handle?(site)
                     site =~ /test/
