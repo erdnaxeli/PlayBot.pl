@@ -1,13 +1,19 @@
+require 'uri'
+
 require 'rubygems'
 require 'net/yail/irc_bot'
 
-require 'site_plugin'
+require_relative 'site_plugin.rb'
+
+
+# --
+# Changing working directory so the inclusion of plugin can be done correctly.
+# I don't complety know why, but this is necessary.
+Dir.chdir(File.expand_path File.dirname(__FILE__))
 
 # --
 # Add plugins folder to LOAD_PATH and subsequently require all plugins.
-dir = '../plugins'
-$LOAD_PATH << dir
-Dir[File.join(dir, '*.rb')].each {|file| require File.basename(file) }
+Dir[File.join('../plugins', '*.rb')].each { |file| require_relative file }
 
 class PlayBot < IRCBot
 	BOTNAME = 'PlayBot'
@@ -65,5 +71,16 @@ class PlayBot < IRCBot
     def _in_msg(event)
         # we don't care of private messages
         return if event.pm?
+
+        url = URI.extract(event.message, ['http', 'https']).first
+        puts "url = #{url}"
+        
+        handler = SitePlugin.for_site(url)
+        return if handler.nil?
+
+        handler = handler.new
+        content = handler.get(url)
+
+        #TODO: use this content...
     end
 end
