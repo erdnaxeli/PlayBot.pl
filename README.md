@@ -1,5 +1,14 @@
 # PlayBot
 
+## ATTENTION
+
+Cette branche a pour but la réécriture du PlayBot en ruby. Avec cette réécriture, un système de plugin et des tests unitaires seront de la partie.
+
+Les dépendances nécéssaires sont :
+ * net-yail
+ * rspec
+
+
 
 ## Description
 

@@ -1,15 +1,20 @@
-#!/usr/bin/ruby
-
-
 require 'rubygems'
 require 'net/yail/irc_bot'
 
+require 'site_plugin'
+
+#
+# Add plugins folder to LOAD_PATH and subsequently require all plugins.
+#
+dir = '../plugins'
+$LOAD_PATH << dir
+Dir[File.join(dir, '*.rb')].each {|file| require File.basename(file) }
 
 class PlayBot < IRCBot
 	BOTNAME = 'PlayBot'
 
 	public
-	# Star a new instance
+	# Start a new instance
 	#
 	# Options:
 	# * <tt>:address</tt>: irc server
@@ -39,7 +44,7 @@ class PlayBot < IRCBot
 	# This metod is called by IRCBot#connect_socket
 	def add_custom_handlers()
 		@irc.hearing_welcome   self.method(:_in_welcome)
-		#@irc.on_msg       self.method(:_in_msg)
+		@irc.on_msg       self.method(:_in_msg)
 	end
 
 	private
@@ -57,4 +62,9 @@ class PlayBot < IRCBot
 
 		msg('NickServ', "identify #{nick_passwd}")
 	end
+
+    def _in_msg(event)
+        # we don't care of private messages
+        return if event.pm?
+    end
 end
