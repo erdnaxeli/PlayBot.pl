@@ -3,9 +3,8 @@ require 'net/yail/irc_bot'
 
 require 'site_plugin'
 
-#
+# --
 # Add plugins folder to LOAD_PATH and subsequently require all plugins.
-#
 dir = '../plugins'
 $LOAD_PATH << dir
 Dir[File.join(dir, '*.rb')].each {|file| require File.basename(file) }
