@@ -1,6 +1,7 @@
 require_relative '../lib/site_plugin.rb'
 
 require 'rubygems'
+require 'bundler/setup'
 require 'youtube_it'
 
 # SitePlugin for YouTube
@@ -10,7 +11,7 @@ class YoutubePlugin < SitePlugin
     end
 
     public
-    def initialize
+    def initialize(options)
         @client = YouTubeIt::Client.new
     end
 

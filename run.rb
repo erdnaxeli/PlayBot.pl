@@ -2,6 +2,7 @@
 
 require 'logger'
 require 'optparse'
+require 'yaml'
 
 require_relative 'lib/playbot'
 
@@ -9,6 +10,7 @@ require_relative 'lib/playbot'
 
 options = {}
 
+# First we read options from command line.
 OptionParser.new do |opts|
     opts.banner = "Usage: ./run.rb [OPTIONS]"
 
@@ -34,9 +36,14 @@ OptionParser.new do |opts|
     end
 end.parse!
 
+# Next we look to an configuration file.
+if File.exists?("#{ENV['HOME']}/.playbot")
+    YAML.load_file("#{ENV['HOME']}/.playbot").each do |k, v|
+        options[k.to_sym] = v unless options.has_key?(k)
+    end
+end
+
 options[:silent] ||= false
-options[:admin] ||= 'moise'
-options[:address] ||= 'irc.iiens.net'
 
 bot = PlayBot.new(
     :address    => options[:address],
