@@ -7,7 +7,7 @@ require 'youtube_it'
 # SitePlugin for YouTube
 class YoutubePlugin < SitePlugin
     def self.can_handle?(site) 
-        site =~ /^http:\/\/((www.)?youtube.(fr|com)\/watch\?v=|youtu\.be\/)[a-zA-Z0-9]+$/
+        site =~ /^https?:\/\/((www.)?youtube.(fr|com)\/watch\?v=|youtu\.be\/)[a-zA-Z0-9]+$/
     end
 
     public
