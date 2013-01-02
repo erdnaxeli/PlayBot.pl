@@ -78,8 +78,7 @@ class PlayBot < IRCBot
         handler = SitePlugin.for_site(url)
         return if handler.nil?
 
-        handler = handler.new(@options)
-        content = handler.get(url)
+        content = handler.new(@options).get(url)
 
         msg(event.channel, "#{content[:title]} | #{content[:author]}")
     end

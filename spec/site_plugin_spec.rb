@@ -31,4 +31,11 @@ describe SitePlugin do
             lambda { @siteplugin.can_handle?('test') }.should raise_error
         end
     end
+
+    describe '#get' do
+        it 'raise an exception' do
+            @siteplugin = SitePlugin.new
+            lambda { @siteplugin.get('test') }.should raise_error
+        end
+    end
 end

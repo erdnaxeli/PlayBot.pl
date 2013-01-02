@@ -17,8 +17,11 @@ describe YoutubePlugin do
 
     describe '#get' do
         it "return video's informations" do
-            YoutubePlugin.new.get('http://youtube.com/watch?v=Pb8VPYMgHlg')[:title].should == 'DJ Showtek - FTS (Fuck the system)'
-            YoutubePlugin.new.get('http://youtube.com/watch?v=Pb8VPYMgHlg')[:author].should == 'bf2julian'
+            options = Options.new.read_file
+            video = YoutubePlugin.new(options).get('http://youtube.com/watch?v=Pb8VPYMgHlg')
+
+            video[:title].should == 'DJ Showtek - FTS (Fuck the system)'
+            video[:author].should == 'bf2julian'
         end
     end
 end
