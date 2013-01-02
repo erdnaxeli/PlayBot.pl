@@ -1,6 +1,7 @@
 require 'uri'
 
 require 'rubygems'
+require 'bundler/setup'
 require 'net/yail/irc_bot'
 
 require_relative 'site_plugin.rb'
@@ -81,6 +82,5 @@ class PlayBot < IRCBot
         content = handler.get(url)
 
         msg(event.channel, "#{content[:title]} | #{content[:author]}")
-        end
     end
 end

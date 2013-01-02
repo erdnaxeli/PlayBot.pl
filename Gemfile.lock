@@ -1,0 +1,46 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    builder (3.1.4)
+    diff-lcs (1.1.3)
+    faraday (0.8.4)
+      multipart-post (~> 1.1)
+    httpauth (0.2.0)
+    jwt (0.1.5)
+      multi_json (>= 1.0)
+    multi_json (1.5.0)
+    multipart-post (1.1.5)
+    net-yail (1.6.0)
+    nokogiri (1.5.6)
+    oauth (0.4.7)
+    oauth2 (0.8.0)
+      faraday (~> 0.8)
+      httpauth (~> 0.1)
+      jwt (~> 0.1.4)
+      multi_json (~> 1.0)
+      rack (~> 1.2)
+    rack (1.4.1)
+    rspec (2.12.0)
+      rspec-core (~> 2.12.0)
+      rspec-expectations (~> 2.12.0)
+      rspec-mocks (~> 2.12.0)
+    rspec-core (2.12.2)
+    rspec-expectations (2.12.1)
+      diff-lcs (~> 1.1.3)
+    rspec-mocks (2.12.1)
+    simple_oauth (0.1.9)
+    youtube_it (2.1.8)
+      builder
+      faraday (~> 0.8)
+      nokogiri (~> 1.5.2)
+      oauth (~> 0.4.4)
+      oauth2 (~> 0.6)
+      simple_oauth (~> 0.1.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  net-yail
+  rspec
+  youtube_it
