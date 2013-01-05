@@ -5,7 +5,9 @@ require 'bundler/setup'
 require 'net/yail/irc_bot'
 
 require_relative 'site_plugin.rb'
+require_relative 'tag_parser.rb'
 require_relative 'music.rb'
+require_relative 'tag.rb'
 
 
 # --
@@ -80,13 +82,27 @@ class PlayBot < IRCBot
         return if handler.nil?
 
         content = handler.new(@options).get(url)
-        music = Music.create(
-            :title  => content[:title],
-            :author => content[:author],
-            :sender => event.nick,
-            :url    => content[:url],
-            :file   => nil)
-        
+
+        music = Music.find_by_url(content[:url])
+        music ||= Music.create(
+                :title  => content[:title],
+                :author => content[:author],
+                :sender => event.nick,
+                :url    => content[:url],
+                :file   => nil
+        )
+
+        tags = TagParser.parse! event.message
+        puts tags
+        tags.each do |tag|
+            if !Tag.exists?(:video => music.id, :tag => tag)
+                Tag.create(
+                    :video => music.id,
+                    :tag   => tag
+                 )
+            end
+        end
+
         msg(event.channel, "#{music.title} | #{music.author}")
     end
 end
