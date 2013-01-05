@@ -1,5 +1,6 @@
 require 'optparse'
 require 'yaml'
+require 'active_support'
 
 # Allow us to get options, set by user or default ones.
 class Options
@@ -43,7 +44,7 @@ class Options
     # Read the options from the configuration file.
     def read_file
         if File.exists?(@file)
-            YAML.load_file(@file).each do |k, v|
+            YAML.load_file(@file).with_indifferent_access.each do |k, v|
                 @options[k.to_sym] = v unless @options.has_key?(k)
             end
         end

@@ -3,6 +3,7 @@ gem "rake"
 gem "net-yail"
 gem "rspec"
 gem "activerecord"
+gem "activesupport"
 gem "sqlite3"
 
 gem "youtube_it"

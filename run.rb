@@ -11,6 +11,7 @@ require_relative 'lib/options'
 options = Options.new.read_all
 
 ActiveRecord::Base.establish_connection(options[:database])
+ActiveRecord::Base.logger = Logger.new(File.open(options[:database][:log], 'a'))
 
 bot = PlayBot.new(options)
 bot.irc_loop

@@ -59,6 +59,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord
+  activesupport
   net-yail
   rake
   rspec

@@ -13,5 +13,5 @@ end
 task :environment do
     config = Options.new.read_file
     ActiveRecord::Base.establish_connection(config[:database])
-    ActiveRecord::Base.logger = Logger.new(File.open('log/database.log', 'a'))
+    ActiveRecord::Base.logger = Logger.new(File.open(config[:database][:log], 'a'))
 end
