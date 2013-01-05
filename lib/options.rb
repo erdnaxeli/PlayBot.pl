@@ -3,7 +3,7 @@ require 'yaml'
 
 # Allow us to get options, set by user or default ones.
 class Options
-    def initialize(file = "#{ENV['HOME']}/.playbot")
+    def initialize(file = "#{ENV['HOME']}/.playbot/config")
         @options = {}
         @file = file
     end

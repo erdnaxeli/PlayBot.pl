@@ -5,6 +5,7 @@ require 'bundler/setup'
 require 'net/yail/irc_bot'
 
 require_relative 'site_plugin.rb'
+require_relative 'music.rb'
 
 
 # --
@@ -79,7 +80,13 @@ class PlayBot < IRCBot
         return if handler.nil?
 
         content = handler.new(@options).get(url)
-
-        msg(event.channel, "#{content[:title]} | #{content[:author]}")
+        music = Music.create(
+            :title  => content[:title],
+            :author => content[:author],
+            :sender => event.nick,
+            :url    => content[:url],
+            :file   => nil)
+        
+        msg(event.channel, "#{music.title} | #{music.author}")
     end
 end

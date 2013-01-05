@@ -19,7 +19,8 @@ class SoundcloudPlugin < SitePlugin
 
     def get(url)
         track = @client.get('/resolve', :url => url)
+        url.gsub(/http:\/\//, 'https://')
 
-        {:title => track.title, :author => track.user.username}
+        {:title => track.title, :author => track.user.username, :url => url}
     end
 end

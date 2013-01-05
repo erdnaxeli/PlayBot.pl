@@ -17,6 +17,7 @@ class YoutubePlugin < SitePlugin
 
     def get(url)
         video = @client.video_by(url)
-        {:title => video.title, :author => video.author.name}
+        url.gsub(/https?:\/\/(www.)?youtube.(fr|com)\/watch\?v=|youtu\.be/, 'https://www.youtube.com')
+        {:title => video.title, :author => video.author.name, :url => url}
     end
 end
