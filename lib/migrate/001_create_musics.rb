@@ -9,6 +9,7 @@ class CreateMusics < ActiveRecord::Migration
             t.string :sender, :null => false
             t.string :url, :null => false
             t.string :file
+            t.timestamps
         end
 
         add_index :musics, :url, :unique
