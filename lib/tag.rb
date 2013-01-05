@@ -5,7 +5,7 @@ require 'active_record'
 # Tag Object
 #
 # Its attribute are :
-#  * video
-#  * tage
+# * video
+# * tage
 class Tag < ActiveRecord::Base
 end
