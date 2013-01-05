@@ -4,11 +4,11 @@
 
 Cette branche a pour but la réécriture du PlayBot en ruby. Avec cette réécriture, un système de plugin et des tests unitaires seront de la partie.
 
-Les dépendances nécéssaires sont :
- * net-yail
- * rspec
- * youtube\_it
+Pour installer les dépendances : « bundle install ».
 
+Pour créer la base de données : « bundle exec rake ».
+
+Pour lancer le bot : « bundle exec ./run.rb ».
 
 
 ## Description

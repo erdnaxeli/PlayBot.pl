@@ -1,6 +1,3 @@
-require 'rubygems'
-require 'bundler/setup'
-
 class CreateMusics < ActiveRecord::Migration
     def self.up
         create_table :musics do |t|
