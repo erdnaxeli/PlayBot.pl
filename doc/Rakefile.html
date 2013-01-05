@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 
-<title>Gemfile - RDoc Documentation</title>
+<title>Rakefile - RDoc Documentation</title>
 
 <link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
 
@@ -91,10 +91,26 @@
 
 <div id="documentation" class="description">
   
-<p>source “<a href="http://rubygems.org">rubygems.org</a>” gem “rake” gem
-“net-yail” gem “rspec” gem “activerecord” gem “activesupport” gem “sqlite3”</p>
+<p>require ‘active_record’ require ‘logger’</p>
 
-<p>gem “youtube_it” gem “soundcloud”</p>
+<p>require_relative ‘lib/options.rb’</p>
+
+<p>task :default =&gt; :migrate</p>
+
+<p>desc “Migrate the database through scripts in db/migrate. Target specific
+version with VERSION=x” task :migrate =&gt; :environment do</p>
+
+<pre>ActiveRecord::Migrator.migrate('lib/migrate', ENV[&quot;VERSION&quot;] ? ENV[&quot;VERSION&quot;].to_i : nil )</pre>
+
+<p>end</p>
+
+<p>task :environment do</p>
+
+<pre>config = Options.new.read_file
+ActiveRecord::Base.establish_connection(config[:database])
+ActiveRecord::Base.logger = Logger.new(File.open(config[:database][:log], 'a'))</pre>
+
+<p>end</p>
 
 </div>
 

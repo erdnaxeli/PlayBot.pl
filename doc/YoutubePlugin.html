@@ -89,6 +89,8 @@
   
     <li class="file"><a href="./Gemfile.html">Gemfile</a>
   
+    <li class="file"><a href="./Rakefile.html">Rakefile</a>
+  
   </ul>
 </nav>
 
@@ -97,6 +99,12 @@
 
   <ul class="link-list">
   
+    <li><a href="./CreateMusics.html">CreateMusics</a>
+  
+    <li><a href="./CreateTags.html">CreateTags</a>
+  
+    <li><a href="./Music.html">Music</a>
+  
     <li><a href="./Options.html">Options</a>
   
     <li><a href="./PlayBot.html">PlayBot</a>
@@ -104,6 +112,8 @@
     <li><a href="./SitePlugin.html">SitePlugin</a>
   
     <li><a href="./SoundcloudPlugin.html">SoundcloudPlugin</a>
+  
+    <li><a href="./Tag.html">Tag</a>
   
     <li><a href="./TestPlugin1.html">TestPlugin1</a>
   
@@ -162,7 +172,7 @@
           <div class="method-source-code" id="can_handle-3F-source">
             <pre><span class="ruby-comment"># File plugins/youtube_plugin.rb, line 9</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">can_handle?</span>(<span class="ruby-identifier">site</span>) 
-    <span class="ruby-identifier">site</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">%r^https?:\/\/((www.)?youtube.(fr|com)\/watch\?v=|youtu\.be\/)[a-zA-Z0-9]+$/</span>
+    <span class="ruby-identifier">site</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">%r^https?:\/\/((www.)?youtube.(fr|com)\/watch\?v=|youtu\.be\/)[a-zA-Z0-9-]+$/</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- can_handle-3F-source -->
           
@@ -229,7 +239,8 @@
             <pre><span class="ruby-comment"># File plugins/youtube_plugin.rb, line 18</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">get</span>(<span class="ruby-identifier">url</span>)
     <span class="ruby-identifier">video</span> = <span class="ruby-ivar">@client</span>.<span class="ruby-identifier">video_by</span>(<span class="ruby-identifier">url</span>)
-    {<span class="ruby-value">:title</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">video</span>.<span class="ruby-identifier">title</span>, <span class="ruby-value">:author</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">video</span>.<span class="ruby-identifier">author</span>.<span class="ruby-identifier">name</span>}
+    <span class="ruby-identifier">url</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">%rhttps?:\/\/(www.)?youtube.(fr|com)\/watch\?v=|youtu\.be/</span>, <span class="ruby-string">'https://www.youtube.com'</span>)
+    {<span class="ruby-value">:title</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">video</span>.<span class="ruby-identifier">title</span>, <span class="ruby-value">:author</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">video</span>.<span class="ruby-identifier">author</span>.<span class="ruby-identifier">name</span>, <span class="ruby-value">:url</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>}
 <span class="ruby-keyword">end</span></pre>
           </div><!-- get-source -->
           

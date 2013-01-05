@@ -87,6 +87,8 @@
   
     <li class="file"><a href="./Gemfile.html">Gemfile</a>
   
+    <li class="file"><a href="./Rakefile.html">Rakefile</a>
+  
   </ul>
 </nav>
 
@@ -95,6 +97,12 @@
 
   <ul class="link-list">
   
+    <li><a href="./CreateMusics.html">CreateMusics</a>
+  
+    <li><a href="./CreateTags.html">CreateTags</a>
+  
+    <li><a href="./Music.html">Music</a>
+  
     <li><a href="./Options.html">Options</a>
   
     <li><a href="./PlayBot.html">PlayBot</a>
@@ -102,6 +110,8 @@
     <li><a href="./SitePlugin.html">SitePlugin</a>
   
     <li><a href="./SoundcloudPlugin.html">SoundcloudPlugin</a>
+  
+    <li><a href="./Tag.html">Tag</a>
   
     <li><a href="./TestPlugin1.html">TestPlugin1</a>
   
@@ -186,7 +196,7 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/playbot.rb, line 33</span>
+            <pre><span class="ruby-comment"># File lib/playbot.rb, line 34</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">options</span> = {})
         <span class="ruby-ivar">@admin</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:admin</span>)
         <span class="ruby-identifier">raise</span> <span class="ruby-string">&quot;You must provide an admin !&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@admin</span>
@@ -235,7 +245,7 @@
 
           
           <div class="method-source-code" id="add_custom_handlers-source">
-            <pre><span class="ruby-comment"># File lib/playbot.rb, line 51</span>
+            <pre><span class="ruby-comment"># File lib/playbot.rb, line 52</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_custom_handlers</span>()
         <span class="ruby-ivar">@irc</span>.<span class="ruby-identifier">hearing_welcome</span>   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-value">:_in_welcome</span>)
         <span class="ruby-ivar">@irc</span>.<span class="ruby-identifier">on_msg</span>       <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-value">:_in_msg</span>)

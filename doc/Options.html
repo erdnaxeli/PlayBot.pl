@@ -89,6 +89,8 @@
   
     <li class="file"><a href="./Gemfile.html">Gemfile</a>
   
+    <li class="file"><a href="./Rakefile.html">Rakefile</a>
+  
   </ul>
 </nav>
 
@@ -97,6 +99,12 @@
 
   <ul class="link-list">
   
+    <li><a href="./CreateMusics.html">CreateMusics</a>
+  
+    <li><a href="./CreateTags.html">CreateTags</a>
+  
+    <li><a href="./Music.html">Music</a>
+  
     <li><a href="./Options.html">Options</a>
   
     <li><a href="./PlayBot.html">PlayBot</a>
@@ -104,6 +112,8 @@
     <li><a href="./SitePlugin.html">SitePlugin</a>
   
     <li><a href="./SoundcloudPlugin.html">SoundcloudPlugin</a>
+  
+    <li><a href="./Tag.html">Tag</a>
   
     <li><a href="./TestPlugin1.html">TestPlugin1</a>
   
@@ -160,8 +170,8 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/options.rb, line 6</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">file</span> = <span class="ruby-node">&quot;#{ENV['HOME']}/.playbot&quot;</span>)
+            <pre><span class="ruby-comment"># File lib/options.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">file</span> = <span class="ruby-node">&quot;#{ENV['HOME']}/.playbot/config&quot;</span>)
     <span class="ruby-ivar">@options</span> = {}
     <span class="ruby-ivar">@file</span> = <span class="ruby-identifier">file</span>
 <span class="ruby-keyword">end</span></pre>
@@ -198,7 +208,7 @@ overwrite configuration file.</p>
 
           
           <div class="method-source-code" id="read_all-source">
-            <pre><span class="ruby-comment"># File lib/options.rb, line 12</span>
+            <pre><span class="ruby-comment"># File lib/options.rb, line 13</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">read_all</span>
     <span class="ruby-comment"># Firt we read options from command line.</span>
     <span class="ruby-constant">OptionParser</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">opts</span><span class="ruby-operator">|</span>
@@ -255,10 +265,10 @@ overwrite configuration file.</p>
 
           
           <div class="method-source-code" id="read_file-source">
-            <pre><span class="ruby-comment"># File lib/options.rb, line 44</span>
+            <pre><span class="ruby-comment"># File lib/options.rb, line 45</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">read_file</span>
     <span class="ruby-keyword">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-ivar">@file</span>)
-        <span class="ruby-constant">YAML</span>.<span class="ruby-identifier">load_file</span>(<span class="ruby-ivar">@file</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span>
+        <span class="ruby-constant">YAML</span>.<span class="ruby-identifier">load_file</span>(<span class="ruby-ivar">@file</span>).<span class="ruby-identifier">with_indifferent_access</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span>
             <span class="ruby-ivar">@options</span>[<span class="ruby-identifier">k</span>.<span class="ruby-identifier">to_sym</span>] = <span class="ruby-identifier">v</span> <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@options</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">k</span>)
         <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
