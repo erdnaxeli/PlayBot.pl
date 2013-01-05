@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-require 'active_record'
+require 'active_support/core_ext/hash/except.rb'
 require 'logger'
 
 require_relative 'lib/playbot'
