@@ -304,6 +304,11 @@ sub on_speak
 
         return;
     }
+    elsif ($msg =~ /^!help/) {
+		$irc->yield(privmsg => $chan => '!fav [<id>]');
+		$irc->yield(privmsg => $chan => '!tag [<id>]');
+		$irc->yield(privmsg => $chan => '!later [<id>] [in <x>[s|m|h]');
+    }
 	else {
 		return;
 	}
