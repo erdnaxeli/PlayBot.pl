@@ -56,6 +56,21 @@ class PlayBot < IRCBot
 		@irc.on_msg       self.method(:_in_msg)
 	end
 
+    # Overwrite IRCBot#connect_socket
+    #
+    # See <https://github.com/Nerdmaster/ruby-irc-yail/issues/9> for more informations.
+    def connect_socket
+        @irc = Net::YAIL.new(@options)
+
+        # THIS is the problem:
+        #setup_reporting(@irc)
+
+        # Simple hook for welcome to allow auto-joining of the channel
+        @irc.on_welcome self.method(:welcome)
+
+        add_custom_handlers
+    end
+
 	private
 	# Welcome event handler
 	#
