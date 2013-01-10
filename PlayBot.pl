@@ -305,9 +305,10 @@ sub on_speak
         return;
     }
     elsif ($msg =~ /^!help/) {
-		$irc->yield(privmsg => $chan => '!fav [<id>]');
-		$irc->yield(privmsg => $chan => '!tag [<id>]');
-		$irc->yield(privmsg => $chan => '!later [<id>] [in <x>[s|m|h]');
+		$irc->yield(privmsg => $chan => '!fav [<id>] : enregistre la vidéo dans les favoris');
+		$irc->yield(privmsg => $chan => '!tag [<id>] : tag la vidéo');
+		$irc->yield(privmsg => $chan => '!later [<id>] [in <x>[s|m|h]] : vidéo rappelée par query');
+		$irc->yield(privmsg => $chan => 'Sans id précisée, la dernière vidéo postée est utilisée.');
 
         return;
     }
