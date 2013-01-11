@@ -307,7 +307,7 @@ sub on_speak
     elsif ($msg =~ /^!help/) {
 		$irc->yield(privmsg => $chan => '!fav [<id>] : enregistre la vidéo dans les favoris');
 		$irc->yield(privmsg => $chan => '!tag [<id>] <tag1> <tag2> ... : tag la vidéo');
-		$irc->yield(privmsg => $chan => '!later [<id>] [in <x>[s|m|h]] : vidéo rappelée par query');
+		$irc->yield(privmsg => $chan => '!later [<id>] [in <x>[s|m|h]] : vidéo rappelée par query (par défaut temps de 6h)');
 		$irc->yield(privmsg => $chan => 'Sans id précisée, la dernière vidéo postée est utilisée.');
 
         return;
