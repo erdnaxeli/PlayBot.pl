@@ -26,7 +26,7 @@ my $nick = 'PlayBot';
 my $port = 6667;
 my $ircname = 'nightiies';
 my $username = 'nightiies';
-my @channels = qw(#nightiies #bigphatsubwoofer);
+my @channels = qw(#nightiies #dansiie);
 my $admin = 'moise';
 my $baseurl = 'http://nightiies.iiens.net/links/';
 my @nicksToVerify;
@@ -83,15 +83,17 @@ sub flux
 	my $kernel = $_[ KERNEL ];
 	my $date = strftime ("%Y-%m-%d", localtime(time - 3600*24));
 	
-	my $sth = $dbh->prepare_cached('SELECT COUNT(*) FROM playbot WHERE date = ?');
-	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-	$sth->execute($date)
-		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-	my ($nbr) = $sth->fetchrow_array;
+    foreach (@channels) {
+	    my $sth = $dbh->prepare_cached('SELECT COUNT(*) FROM playbot WHERE date = ? and chan = ?');
+	    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+	    $sth->execute($date, $_)
+		    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+	    my ($nbr) = $sth->fetchrow_array;
 
-	if ($nbr) {
-		$irc->yield(privmsg => $_ => $nbr.' liens aujourd\'hui : '.$baseurl.$date) foreach (@channels);
-	}
+	    if ($nbr) {
+		    $irc->yield(privmsg => $_ => $nbr.' liens aujourd\'hui : '.$baseurl.$date);
+	    }
+    }
 
 	$kernel->delay_set('_flux', 3600*24);
 }
