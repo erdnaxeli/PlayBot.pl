@@ -20,8 +20,8 @@ class Options
                 exit
             end
 
-            opts.on('-s', '--silent', 'set log to FATAL') do
-                @options[:silent] = true
+            opts.on('-v', '--verbose', 'enable verbose mode') do
+                @options[:verbose] = true
             end
 
             opts.on('-a', '--admin', 'admin nick') do
@@ -29,7 +29,7 @@ class Options
             end
 
             opts.on('-n', '--network', 'server address') do
-                @options[:address] = arg
+                @options[:server] = arg
             end
 
             opts.on('-p', '--port', 'server port') do
@@ -49,8 +49,11 @@ class Options
             end
         end
 
-        @options[:silent] ||= false
-        @options[:nicknames] ||= ['PlayBot', 'Play_Bot', 'Play__Bot', 'Play___Bot']
+        @options[:verbose] ||= false
+        @options[:nick] ||= "PlayBot"
+        @options[:nicks] ||= ['Play_Bot', 'Play__Bot', 'Play___Bot']
+        @options[:realname] || = "PlayBot"
+        @options[:user] ||= "PlayBot"
         @options[:channels] ||= ['#hormone']
         @options
     end

@@ -1,23 +1,23 @@
-require_relative '../lib/site_plugin.rb'
-
 require 'rubygems'
 require 'bundler/setup'
+require 'cinch'
 require 'youtube_it'
 
 # SitePlugin for YouTube
-class YoutubePlugin < SitePlugin
-    def self.can_handle?(site) 
-        site =~ /^https?:\/\/((www.)?youtube.(fr|com)\/watch\?v=|youtu\.be\/)[a-zA-Z0-9-]+$/
-    end
+class Youtube
+    include Cinch::Plugin
 
-    public
-    def initialize(options)
-        @client = YouTubeIt::Client.new
-    end
+    match /^https?:\/\/((www.)?youtube.(fr|com)\/watch\?v=|youtu\.be\/)[a-zA-Z0-9-]+$/
 
     def get(url)
-        video = @client.video_by(url)
+        client = YouTubeIt::Client.new
+        video = client.video_by(url)
         url.gsub(/https?:\/\/(www.)?youtube.(fr|com)\/watch\?v=|youtu\.be/, 'https://www.youtube.com')
         {:title => video.title, :author => video.author.name, :url => url}
+    end
+
+    def execute(m, url)
+        infos = get(url)
+        m.reply("#{infos.title} | #{infos.author}")
     end
 end

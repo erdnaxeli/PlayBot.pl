@@ -7,20 +7,21 @@ require 'soundcloud'
 # SitePlugin for Soundcloud
 #
 # Need an client ID (soundcloud_client_id).
-class SoundcloudPlugin < SitePlugin
-    def self.can_handle?(site) 
-        site =~ /^https?:\/\/(www\.)?soundcloud\.com\/[a-zA-Z0-9\/_-]+$/
-    end
+class SoundCloud
+    include Cinch::Plugin
 
-    public
-    def initialize(options)
-        @client = Soundcloud.new(:client_id => options[:soundcloud_client_id])
-    end
+    match /^https?:\/\/(www\.)?soundcloud\.com\/[a-zA-Z0-9\/_-]+$/
 
     def get(url)
-        track = @client.get('/resolve', :url => url)
+        client = Soundcloud.new(:client_id => config[:client_id])
+        track = client.get('/resolve', :url => url)
         url.gsub(/http:\/\//, 'https://')
 
         {:title => track.title, :author => track.user.username, :url => url}
+    end
+
+    def execute(m, url)
+        infos = get(url)
+        m.reply("#{infos.title} | #{infos.author}")
     end
 end

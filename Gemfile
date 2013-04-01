@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 gem "rake"
-gem "net-yail"
+gem "cinch"
 gem "rspec"
 gem "activerecord"
 gem "activesupport"
