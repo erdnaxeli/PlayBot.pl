@@ -26,7 +26,7 @@ my $nick = 'PlayBot';
 my $port = 6667;
 my $ircname = 'nightiies';
 my $username = 'nightiies';
-my @channels = qw(#nightiies #dansiie #pimpim);
+my @channels = qw(#nightiies #dansiie #pimpim #vitamine #fanfare #groop);
 my $admin = 'moise';
 my $baseurl = 'http://nightiies.iiens.net/links/';
 my @nicksToVerify;
@@ -162,8 +162,13 @@ sub bot_start {
 sub on_connect
 {
 	my $kernel = $_[ KERNEL ];
-	$irc->yield(join => $_) foreach (@channels);
+
 	$log->info('connected');
+
+	foreach (@channels) {
+		$irc->yield(join => $_);
+		$log->info("join $_");
+	}
 	
 	my $hour = strftime ('%H', localtime);
 	my $min = strftime ('%M', localtime);
@@ -332,7 +337,7 @@ sub on_speak
 		my $sth = $dbh->prepare_cached('INSERT INTO playbot (date, type, url, sender_irc, sender, title, chan) VALUES (NOW(),?,?,?,?,?,?)');
 		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-		$sth->execute($site, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan)
+		$sth->execute($site, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan->[0])
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 	}
 
