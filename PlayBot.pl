@@ -66,6 +66,7 @@ POE::Session->create(
 		irc_001    => \&on_connect,
 		irc_public => \&on_speak,
 		irc_msg    => \&on_query,
+		irc_invite => \&on_invite,
 		irc_notice => \&on_notice,
 		_flux	   => \&flux,
 		_later     => \&later
@@ -245,6 +246,15 @@ sub on_notice
 	}
 }
 
+# Quand on m'invite, je join
+sub on_invite
+{
+	my ($kernel, $user, $chan) = @_[KERNEL, ARG0, ARG1];
+	my ($nick,$mask) = split(/!/,$user);
+
+	$log->info($nick . " m'invite sur ". $chan);
+	$irc->yield(join => $chan);
+}
 
 # Quand un user parle
 sub on_speak
