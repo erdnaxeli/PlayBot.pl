@@ -91,7 +91,7 @@ sub flux
 	    my ($nbr) = $sth->fetchrow_array;
 
 	    if ($nbr) {
-		    $irc->yield(privmsg => $_ => $nbr.' liens aujourd\'hui : '.$baseurl.$date);
+		    $irc->yield(privmsg => $_ => $nbr.' liens aujourd\'hui : '.$baseurl . substr ($_, 1) . '/' . $date);
 	    }
     }
 
