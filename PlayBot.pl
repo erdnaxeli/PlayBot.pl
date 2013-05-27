@@ -26,7 +26,7 @@ my $nick = 'PlayBot';
 my $port = 6667;
 my $ircname = 'nightiies';
 my $username = 'nightiies';
-my @channels = qw(#nightiies #dansiie #pimpim);
+my @channels = qw(#nightiies #dansiie #pimpim #vitamine #fanfare #groop);
 my $admin = 'moise';
 my $baseurl = 'http://nightiies.iiens.net/links/';
 my @nicksToVerify;
@@ -66,6 +66,7 @@ POE::Session->create(
 		irc_001    => \&on_connect,
 		irc_public => \&on_speak,
 		irc_msg    => \&on_query,
+		irc_invite => \&on_invite,
 		irc_notice => \&on_notice,
 		_flux	   => \&flux,
 		_later     => \&later
@@ -162,8 +163,13 @@ sub bot_start {
 sub on_connect
 {
 	my $kernel = $_[ KERNEL ];
-	$irc->yield(join => $_) foreach (@channels);
+
 	$log->info('connected');
+
+	foreach (@channels) {
+		$irc->yield(join => $_);
+		$log->info("join $_");
+	}
 	
 	my $hour = strftime ('%H', localtime);
 	my $min = strftime ('%M', localtime);
@@ -240,6 +246,15 @@ sub on_notice
 	}
 }
 
+# Quand on m'invite, je join
+sub on_invite
+{
+	my ($kernel, $user, $chan) = @_[KERNEL, ARG0, ARG1];
+	my ($nick,$mask) = split(/!/,$user);
+
+	$log->info($nick . " m'invite sur ". $chan);
+	$irc->yield(join => $chan);
+}
 
 # Quand un user parle
 sub on_speak
