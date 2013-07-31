@@ -302,13 +302,12 @@ sub on_speak
 
 		return;
 	}
-	elsif ($msg =~ /^!later( ([0-9]*)( in ([0-9]*)(h|m|s)?)?)?/) {
-		my ($id, $time, $unit) = ($2, $4, $5);
+	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
+		my ($id, $time, $unit) = ($1, $2, $3);
 
 		$id = $lastID if (!$id);
 		$time = 6 if (!$time);
 		$time *= ($unit eq 's') ? 1 : ($unit eq 'm') ? 60 : 3600;
-		print "$time eq\n";
 		$kernel->delay_set('_later', $time, $nick, $id);
 
 		return;
