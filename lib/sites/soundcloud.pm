@@ -5,7 +5,7 @@ use JSON;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(soundcloud);
+our @EXPORT_OK = qw(soundcloud);
 
 
 my $root = 'http://api.soundcloud.com';

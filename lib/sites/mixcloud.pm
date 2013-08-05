@@ -6,7 +6,7 @@ use HTML::Entities;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(mixcloud);
+our @EXPORT_OK = qw(mixcloud);
 
 
 my $inTitle = 0;

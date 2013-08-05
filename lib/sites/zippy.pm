@@ -6,7 +6,7 @@ use HTML::Entities;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(zippy);
+our @EXPORT_OK = qw(zippy);
 
 
 my $inTitle = 0;

@@ -6,7 +6,7 @@ use HTML::Entities;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(youtube);
+our @EXPORT_OK = qw(youtube);
 
 
 my $inTitle = 0;
