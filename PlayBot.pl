@@ -1,14 +1,19 @@
 #!/usr/bin/perl -w
 use strict;
 use warnings;
+
 use POE;
 use POE::Component::IRC;
 use POSIX 'strftime';
 use DBI;
 use Tie::File;
 use JSON;
+use FindBin;
 
+use lib "$FindBin::Bin/lib/";
 use Logging;
+
+use lib "$FindBin::Bin/lib/sites";
 use youtube;
 use soundcloud;
 use mixcloud;
