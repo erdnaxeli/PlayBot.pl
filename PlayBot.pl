@@ -13,11 +13,10 @@ use FindBin;
 use lib "$FindBin::Bin/lib/";
 use Logging;
 
-use lib "$FindBin::Bin/lib/sites";
-use youtube;
-use soundcloud;
-use mixcloud;
-use zippy;
+use sites::youtube;
+use sites::soundcloud;
+use sites::mixcloud;
+use sites::zippy;
 
 
 # nom du fichier
