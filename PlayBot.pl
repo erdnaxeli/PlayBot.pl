@@ -8,6 +8,7 @@ use POSIX 'strftime';
 use DBI;
 use Tie::File;
 use JSON;
+use Module::Refresh;
 use FindBin;
 
 use lib "$FindBin::Bin/lib/";
@@ -139,10 +140,9 @@ sub cycle
 {
 	my ($arg) = @_;
 
-	$log->info("restarting");
-	$irc->yield(quit => 'goodbye');
-	sleep 1;
-	exec $bot;
+	$log->info("refresh modules");
+
+    Module::Refresh->refresh;
 }
 
 
