@@ -13,12 +13,7 @@ use FindBin;
 
 use lib "$FindBin::Bin/lib/";
 use Logging;
-
-use sites::youtube qw(youtube);
-use sites::soundcloud qw(soundcloud);
-use sites::mixcloud qw(mixcloud);
-use sites::zippy qw(zippy);
-
+use parser;
 
 # nom du fichier
 my $bot = $0;
@@ -57,10 +52,10 @@ my $conf = decode_json($json);
 ## CONNEXION 
 my ($irc) = POE::Component::IRC->spawn();
 my $dbh = DBI->connect('DBI:mysql:'.$conf->{'bdd'}.';host='.$conf->{'host'}, $conf->{'user'}, $conf->{'passwd'}, {
-	        PrintError => 0,
-	        AutoCommit => 1,
+	    PrintError => 0,
+	    AutoCommit => 1,
 		mysql_auto_reconnect => 1
-	  })
+	})
 	or die("Couldn't connect to database: ".DBI->errstr);
 
 
@@ -68,13 +63,13 @@ my $dbh = DBI->connect('DBI:mysql:'.$conf->{'bdd'}.';host='.$conf->{'host'}, $co
 POE::Session->create(
 	inline_states => {
 		_start     => \&bot_start,
-		irc_001    => \&on_connect,
-		irc_public => \&on_speak,
+	irc_001    => \&on_connect,
+irc_public => \&on_speak,
 		irc_msg    => \&on_query,
-		irc_invite => \&on_invite,
-		irc_notice => \&on_notice,
+	irc_invite => \&on_invite,
+irc_notice => \&on_notice,
 		_flux	   => \&flux,
-		_later     => \&later
+	_later     => \&later
 	},
 );
 
@@ -88,7 +83,7 @@ sub flux
 {
 	my $kernel = $_[ KERNEL ];
 	my $date = strftime ("%Y-%m-%d", localtime(time - 3600*24));
-	
+
     foreach (@channels) {
 	    my $sth = $dbh->prepare_cached('SELECT COUNT(*) FROM playbot WHERE date = ? and chan = ?');
 	    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
@@ -115,7 +110,7 @@ sub addTag
 	$sth->execute($id, $tag)
 		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 }
-	
+
 
 sub later
 {
@@ -174,7 +169,7 @@ sub on_connect
 		$irc->yield(join => $_);
 		$log->info("join $_");
 	}
-	
+
 	my $hour = strftime ('%H', localtime);
 	my $min = strftime ('%M', localtime);
 
@@ -221,7 +216,7 @@ sub on_notice
 	my $code = shift @codesToVerify;
 
 	return unless (defined($nickToVerify));
-	
+
 	if ($msg !~ /$nickToVerify/) {
 		push (@nicksToVerify, $nickToVerify);
 		push (@codesToVerify, $code);
@@ -240,7 +235,7 @@ sub on_notice
 
 			$sth->execute($nickToVerify, $code)
 				or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-			
+
 			$irc->yield(privmsg => $nickToVerify => 'Association effectuée');
 			$irc->yield(privmsg => $nickToVerify => 'pour enregistrer un lien dans tes favoris : !fav <id>');
 		}
@@ -265,29 +260,61 @@ sub on_speak
 {
 	my ($kernel, $user, $chan, $msg) = @_[KERNEL, ARG0, ARG1, ARG2];
 	my ($nick,$mask) = split(/!/,$user);
-	my $site;
 	my %content;
 
-	if ($msg =~ m#(^|[^!])https?://(www.youtube.com/watch\?[a-zA-Z0-9_=&-]*v=|youtu.be/)([a-zA-Z0-9_-]+)#) {
-		my $url = 'https://www.youtube.com/watch?v='.$3;
-		eval { %content = youtube($url) };
-		$site = 'youtube';
-	}
-	elsif ($msg =~ m#(^|[^!])https?://soundcloud.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)#) {
-		my $url = 'https://www.soundcloud.com/'.$2;
-		eval { %content = soundcloud($url) };
-		$site = 'soundcloud';
-	}
-	elsif ($msg =~ m#(^|[^!])https?://www.mixcloud.com/([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+)#) {
-		my $url = 'https://www.mixcloud.com/'.$2;
-		eval { %content = mixcloud($url) };
-		$site = 'mixcloud';
-	}
-	elsif ($msg =~ m#((^|[^!])http://www[0-9]+.zippyshare.com/v/[0-9]+/file.html)#) {
-		my $url = $1;
-		eval { %content = zippy($url) };
-		$site = 'zippyshare';
-	}
+	%content = parser::parse($msg);
+
+    if ($@) {
+        $log->warning ($@);
+        return;
+    }
+
+    if (%content) {
+	    if ($debug) {
+		    $log->debug($content{'url'});
+	    }
+	    else {
+		    # insertion de la vidéo dans la bdd
+		    my $sth = $dbh->prepare_cached('INSERT INTO playbot (date, type, url, sender_irc, sender, title, chan) VALUES (NOW(),?,?,?,?,?,?)');
+		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+		    $sth->execute($content{'site'}, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan->[0])
+			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+	    }
+
+	    # sélection de l'id de la vidéo insérée
+	    my $id = $dbh->{mysql_insert_id};
+	    if (!$id) {
+		    my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
+		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+		    $sth->execute($content{'url'})
+			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+		    $id = $sth->fetch->[0];
+	    }
+	    $lastID = $id;
+
+
+	    # insertion des éventuels tags
+	    while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
+		    if ($debug) {
+			    $log->debug($1);
+			    next;
+		    }
+
+            addTag ($lastID, $1);
+        }
+
+
+	    # message sur irc
+	    if (defined $content{'author'}) {
+		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}.' | '.$content{'author'}) ;
+	    }
+	    else {
+		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
+	    }
+    }
 	elsif ($msg =~ /^!fav( ([0-9]+))?/) {
 		my $id = ($2) ? $2 : $lastID;
 
@@ -295,16 +322,14 @@ sub on_speak
 		$sth->execute($nick)
 			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
-		unless ($sth->rows) {
+		if (!$sth->rows) {
 			$irc->yield(privmsg => $nick => "Ce nick n'est associé à aucun login arise. Va sur http://nightiies.iiens.net/links/fav pour obtenir ton code personel.");
-			return;
 		}
-
-		my $sth2 = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) VALUES (?, ?)');
-		$sth2->execute($id, $sth->fetch->[0])
-			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-
-		return;
+        else {
+    		my $sth2 = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) VALUES (?, ?)');
+		    $sth2->execute($id, $sth->fetch->[0])
+	    		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+        }
 	}
 	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
 		my ($id, $time, $unit) = ($1, $2, $3);
@@ -313,79 +338,19 @@ sub on_speak
 		$time = 6 if (!$time);
 		$time *= ($unit eq 's') ? 1 : ($unit eq 'm') ? 60 : 3600;
 		$kernel->delay_set('_later', $time, $nick, $id);
-
-		return;
 	}
     elsif ($msg =~ /^!tag( +([0-9]+))?/) {
         my $id = ($2) ? $2 : $lastID;
         while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
             addTag($id, $1);
         }
-
-        return;
     }
     elsif ($msg =~ /^!help/) {
 		$irc->yield(privmsg => $chan => '!fav [<id>] : enregistre la vidéo dans les favoris');
 		$irc->yield(privmsg => $chan => '!tag [<id>] <tag1> <tag2> ... : tag la vidéo');
 		$irc->yield(privmsg => $chan => '!later [<id>] [in <x>[s|m|h]] : vidéo rappelée par query (par défaut temps de 6h)');
 		$irc->yield(privmsg => $chan => 'Sans id précisée, la dernière vidéo postée est utilisée.');
-
-        return;
     }
-	else {
-		return;
-	}
-
-	if ($@) {
-		$log->warning ($@);
-		return;
-	}
-
-	if ($debug) {
-		$log->debug($content{'url'});
-	}
-	else {
-		# insertion de la vidéo dans la bdd
-
-		my $sth = $dbh->prepare_cached('INSERT INTO playbot (date, type, url, sender_irc, sender, title, chan) VALUES (NOW(),?,?,?,?,?,?)');
-		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-		$sth->execute($site, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan->[0])
-			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-	}
-
-	# sélection de l'id de la vidéo insérée
-	my $id = $dbh->{mysql_insert_id};
-	if (!$id) {
-		my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
-		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-		$sth->execute($content{'url'})
-			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-
-		$id = $sth->fetch->[0];
-	}
-	$lastID = $id;
-
-
-	# insertion des éventuels tags
-	while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
-		if ($debug) {
-			$log->debug($1);
-			next;
-		}
-
-        addTag ($lastID, $1);
-    }
-
-
-	# message sur irc
-	if (defined $content{'author'}) {
-		$irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}.' | '.$content{'author'}) ;
-	}
-	else {
-		$irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
-	}
 }
 
 
