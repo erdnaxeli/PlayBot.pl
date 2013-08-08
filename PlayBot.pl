@@ -14,6 +14,7 @@ use FindBin;
 use lib "$FindBin::Bin/lib/";
 use Logging;
 use sites::parser;
+use commands::parser;
 
 # nom du fichier
 my $bot = $0;
@@ -58,6 +59,8 @@ my $dbh = DBI->connect('DBI:mysql:'.$conf->{'bdd'}.';host='.$conf->{'host'}, $co
 	})
 	or die("Couldn't connect to database: ".DBI->errstr);
 
+$commands::parser::irc = $irc;
+$commands::parser::dbh = $dbh;
 
 # Evenements que le bot va gérer
 POE::Session->create(
@@ -75,7 +78,6 @@ irc_notice => \&on_notice,
 
 
 my %commandes_admin = ("cycle" => \&cycle);
-
 
 
 ### FONCTIONS
@@ -259,6 +261,8 @@ sub on_invite
 sub on_speak
 {
 	my ($kernel, $user, $chan, $msg) = @_[KERNEL, ARG0, ARG1, ARG2];
+    my @args = ($kernel, $user, $chan, $msg);
+
 	my ($nick,$mask) = split(/!/,$user);
 	my %content;
 
@@ -315,42 +319,9 @@ sub on_speak
 		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
 	    }
     }
-	elsif ($msg =~ /^!fav( ([0-9]+))?/) {
-		my $id = ($2) ? $2 : $lastID;
-
-		my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE nick = ?');
-		$sth->execute($nick)
-			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-
-		if (!$sth->rows) {
-			$irc->yield(privmsg => $nick => "Ce nick n'est associé à aucun login arise. Va sur http://nightiies.iiens.net/links/fav pour obtenir ton code personel.");
-		}
-        else {
-    		my $sth2 = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) VALUES (?, ?)');
-		    $sth2->execute($id, $sth->fetch->[0])
-	    		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-        }
-	}
-	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
-		my ($id, $time, $unit) = ($1, $2, $3);
-
-		$id = $lastID if (!$id);
-		$time = 6 if (!$time);
-		$time *= ($unit eq 's') ? 1 : ($unit eq 'm') ? 60 : 3600;
-		$kernel->delay_set('_later', $time, $nick, $id);
-	}
-    elsif ($msg =~ /^!tag( +([0-9]+))?/) {
-        my $id = ($2) ? $2 : $lastID;
-        while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
-            addTag($id, $1);
-        }
-    }
-    elsif ($msg =~ /^!help/) {
-		$irc->yield(privmsg => $chan => '!fav [<id>] : enregistre la vidéo dans les favoris');
-		$irc->yield(privmsg => $chan => '!tag [<id>] <tag1> <tag2> ... : tag la vidéo');
-		$irc->yield(privmsg => $chan => '!later [<id>] [in <x>[s|m|h]] : vidéo rappelée par query (par défaut temps de 6h)');
-		$irc->yield(privmsg => $chan => 'Sans id précisée, la dernière vidéo postée est utilisée.');
-    }
+    else {
+        commands::parser::exec(@args);
+    }	
 }
 
 
