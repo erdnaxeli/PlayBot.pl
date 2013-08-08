@@ -13,7 +13,7 @@ use FindBin;
 
 use lib "$FindBin::Bin/lib/";
 use Logging;
-use parser;
+use sites::parser;
 
 # nom du fichier
 my $bot = $0;
@@ -262,7 +262,7 @@ sub on_speak
 	my ($nick,$mask) = split(/!/,$user);
 	my %content;
 
-	%content = parser::parse($msg);
+	%content = sites::parser::parse($msg);
 
     if ($@) {
         $log->warning ($@);
