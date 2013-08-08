@@ -1,4 +1,4 @@
-package parser;
+package sites::parser;
 
 require Exporter;
 our @ISA = qw(Exporter);
