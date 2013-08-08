@@ -266,61 +266,60 @@ sub on_speak
 	my ($nick,$mask) = split(/!/,$user);
 	my %content;
 
-	%content = sites::parser::parse($msg);
+    if (!commands::parser::exec(@args)) {
+	    %content = sites::parser::parse($msg);
 
-    if ($@) {
-        $log->warning ($@);
-        return;
-    }
-
-    if (%content) {
-	    if ($debug) {
-		    $log->debug($content{'url'});
-	    }
-	    else {
-		    # insertion de la vidéo dans la bdd
-		    my $sth = $dbh->prepare_cached('INSERT INTO playbot (date, type, url, sender_irc, sender, title, chan) VALUES (NOW(),?,?,?,?,?,?)');
-		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-		    $sth->execute($content{'site'}, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan->[0])
-			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-	    }
-
-	    # sélection de l'id de la vidéo insérée
-	    my $id = $dbh->{mysql_insert_id};
-	    if (!$id) {
-		    my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
-		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-		    $sth->execute($content{'url'})
-			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-
-		    $id = $sth->fetch->[0];
-	    }
-	    $lastID = $id;
-
-
-	    # insertion des éventuels tags
-	    while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
-		    if ($debug) {
-			    $log->debug($1);
-			    next;
-		    }
-
-            addTag ($lastID, $1);
+        if ($@) {
+            $log->warning ($@);
+            return;
         }
 
+        if (%content) {
+	        if ($debug) {
+		        $log->debug($content{'url'});
+	        }
+	        else {
+		        # insertion de la vidéo dans la bdd
+		        my $sth = $dbh->prepare_cached('INSERT INTO playbot (date, type, url, sender_irc, sender, title, chan) VALUES (NOW(),?,?,?,?,?,?)');
+		        $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-	    # message sur irc
-	    if (defined $content{'author'}) {
-		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}.' | '.$content{'author'}) ;
-	    }
-	    else {
-		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
-	    }
-    }
-    else {
-        commands::parser::exec(@args);
+		        $sth->execute($content{'site'}, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan->[0])
+			        or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+	        }
+
+	        # sélection de l'id de la vidéo insérée
+	        my $id = $dbh->{mysql_insert_id};
+	        if (!$id) {
+		        my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
+		        $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+		        $sth->execute($content{'url'})
+			        or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+		        $id = $sth->fetch->[0];
+	        }
+	        $lastID = $id;
+
+
+	        # insertion des éventuels tags
+	        while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
+		        if ($debug) {
+			        $log->debug($1);
+			        next;
+		        }
+
+                addTag ($lastID, $1);
+            }
+
+
+	        # message sur irc
+	        if (defined $content{'author'}) {
+		        $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}.' | '.$content{'author'}) ;
+	        }
+	        else {
+		        $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
+	        }
+        }
     }	
 }
 
