@@ -6,7 +6,7 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(youtube);
 
-sub youtube {
+sub get {
 	my $id = shift;
 
     my $yt = new WebService::GData::YouTube();

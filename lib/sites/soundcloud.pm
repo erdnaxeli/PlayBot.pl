@@ -12,7 +12,7 @@ my $root = 'http://api.soundcloud.com';
 my $clientId = 'f4956716fe1a9dc9c3725af822963365';
 
 
-sub soundcloud {
+sub get {
 	my ($url) = @_;
 
 	my $ua = LWP::UserAgent->new(timeout => 30);

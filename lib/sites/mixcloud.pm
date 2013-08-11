@@ -14,7 +14,7 @@ my $inAuthor = 0;
 my %infos;
 
 
-sub mixcloud {
+sub get {
 	my ($url) = @_;
 
 	my $ua = LWP::UserAgent->new(
