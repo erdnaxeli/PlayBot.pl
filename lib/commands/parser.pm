@@ -19,10 +19,11 @@ sub exec {
 	my ($kernel, $user, $chan, $msg) = @_;
 	my ($nick,$mask) = split(/!/,$user);
 
-    if ($msg =~ /^!fav( ([0-9]+))?/) {
-        $commands::fav::irc = $irc;
+    if ($msg =~ /^!fav(?: ([0-9]+))?/) {
+        $id = ($1) ? $1 : $lastID;
+
         $commands::fav::dbh = $dbh;
-        commands::fav::exec($2)
+        commands::fav::exec($nick, $id)
 	}
 	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
         my $id = ($1) ? $1 : $lastID;

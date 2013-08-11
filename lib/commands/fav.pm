@@ -4,11 +4,10 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(exec);
 
-our $irc;
 our $dbh;
 
 sub exec {
-    my $id = shift;
+    my ($nick, $id) = @_;
 
     my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE nick = ?');
     $sth->execute($nick)
@@ -23,3 +22,5 @@ sub exec {
 	        or $log->error("Couldn't finish transaction: " . $dbh->errstr);
     }
 }
+
+1;
