@@ -65,14 +65,14 @@ $commands::parser::dbh = $dbh;
 # Evenements que le bot va gérer
 POE::Session->create(
 	inline_states => {
-		_start     => \&bot_start,
-	irc_001    => \&on_connect,
-irc_public => \&on_speak,
-		irc_msg    => \&on_query,
-	irc_invite => \&on_invite,
-irc_notice => \&on_notice,
+        _start     => \&bot_start,
+        irc_001    => \&on_connect,
+        irc_public => \&on_speak,
+        irc_msg    => \&on_query,
+        irc_invite => \&on_invite,
+        irc_notice => \&on_notice,
 		_flux	   => \&flux,
-	_later     => \&later
+        _later     => \&later
 	},
 );
 
@@ -140,6 +140,10 @@ sub cycle
 	$log->info("refresh modules");
 
     Module::Refresh->refresh;
+
+    $commands::parser::irc = $irc;
+    $commands::parser::dbh = $dbh;
+    $commands::parser::lastID = $lastID;
 }
 
 
@@ -299,6 +303,7 @@ sub on_speak
 		        $id = $sth->fetch->[0];
 	        }
 	        $lastID = $id;
+            $commands::parser::lastID = $id;
 
 
 	        # insertion des éventuels tags
