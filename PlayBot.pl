@@ -101,18 +101,6 @@ sub flux
 }
 
 
-sub addTag
-{
-    my ($id, $tag) = @_;
-
-    my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
-	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-	$sth->execute($id, $tag)
-		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-}
-
-
 sub later
 {
 	my ($nick, $id) = @_[ARG0,ARG1];
@@ -303,17 +291,8 @@ sub on_speak
 	        $lastID = $id;
             $commands::parser::lastID = $id;
 
-
 	        # insertion des éventuels tags
-	        while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
-		        if ($debug) {
-			        $log->debug($1);
-			        next;
-		        }
-
-                addTag ($lastID, $1);
-            }
-
+            commands::parser::tag($msg);
 
 	        # message sur irc
 	        if (defined $content{'author'}) {

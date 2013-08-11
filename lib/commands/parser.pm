@@ -38,11 +38,10 @@ sub exec {
 
         commands::later::exec($id, $time, $unit);
 	}
-    elsif ($msg =~ /^!tag( +([0-9]+))?/) {
-        my $id = ($2) ? $2 : $lastID;
-        while ($msg =~ /#([a-zA-Z0-9_-]+)/g) {
-            addTag($id, $1);
-        }
+    elsif ($msg =~ /^!tag(?: +([0-9]+))?/) {
+        my $id = ($1) ? $1 : $lastID;
+
+        commands::tag($id, $msg);
     }
     elsif ($msg =~ /^!help/) {
 		$irc->yield(privmsg => $chan => '!fav [<id>] : enregistre la vidéo dans les favoris');
@@ -55,6 +54,12 @@ sub exec {
     }
 
     return 1;
+}
+
+sub tag {
+    my ($msg) = @_;
+
+    commands::tag($lastID, $msg);
 }
 
 1;
