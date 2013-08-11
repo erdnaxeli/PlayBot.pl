@@ -2,10 +2,10 @@ package commands::parser;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(exec irc);
+our @EXPORT_OK = qw(exec);
 
-use lib "$FindBin::Bin/lib/commands/";
-#use fav;
+use lib "$FindBin::Bin/lib/";
+use commands::fav;
 #use later;
 #use tag;
 #use help;
@@ -18,20 +18,9 @@ sub exec {
 	my ($nick,$mask) = split(/!/,$user);
 
     if ($msg =~ /^!fav( ([0-9]+))?/) {
-		my $id = ($2) ? $2 : $lastID;
-
-		my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE nick = ?');
-		$sth->execute($nick)
-			or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-
-		if (!$sth->rows) {
-			$irc->yield(privmsg => $nick => "Ce nick n'est associé à aucun login arise. Va sur http://nightiies.iiens.net/links/fav pour obtenir ton code personel.");
-		}
-        else {
-    		my $sth2 = $dbh->prepare_cached('INSERT INTO playbot_fav (id, user) VALUES (?, ?)');
-		    $sth2->execute($id, $sth->fetch->[0])
-	    		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-        }
+        $commands::fav::irc = $irc;
+        $commands::fav::dbh = $dbh;
+        commands::fav::exec($2)
 	}
 	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
 		my ($id, $time, $unit) = ($1, $2, $3);
