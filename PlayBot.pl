@@ -128,6 +128,10 @@ sub cycle
 
     commands::parser::setConf($irc, $dbh, $log);
     %commands::parser::lastID = %lastID;
+
+    $sites::parser::dbh = $dbh;
+    $sites::parser::irc = $irc;
+    $sites::parser::log = $log;
 }
 
 
@@ -254,57 +258,28 @@ sub on_speak
 	my ($nick,$mask) = split(/!/,$user);
 	my %content;
 
+    # first we test if it's a command
     if (!commands::parser::exec(@args)) {
-	    %content = sites::parser::parse($msg);
+        # if not, maybe there is an url we can parse
+	    my $id = sites::parser::parse(@args);
 
-        if ($@) {
-            $log->warning ($@);
-            return;
-        }
-
-        if (%content) {
-	        if ($debug) {
-		        $log->debug($content{'url'});
-	        }
-	        else {
-		        # insertion de la vidéo dans la bdd
-		        my $sth = $dbh->prepare_cached('INSERT INTO playbot (date, type, url, sender_irc, sender, title, chan) VALUES (NOW(),?,?,?,?,?,?)');
-		        $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-		        $sth->execute($content{'site'}, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan->[0])
-			        or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-	        }
-
-	        # sélection de l'id de la vidéo insérée
-	        my $id = $dbh->{mysql_insert_id};
-	        if (!$id) {
-		        my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
-		        $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-		        $sth->execute($content{'url'})
-			        or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-
-		        $id = $sth->fetch->[0];
-	        }
+        if ($id) {
+            # if yes, we need to save the new content's id
 	        $lastID{$chan->[0]} = $id;
             $commands::parser::lastID{$chan->[0]} = $id;
 
-	        # insertion des éventuels tags
+	        # we insert the potiential tags
             commands::parser::tag($msg, $chan);
-
-	        # message sur irc
-	        if (defined $content{'author'}) {
-		        $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}.' | '.$content{'author'}) ;
-	        }
-	        else {
-		        $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
-	        }
         }
     }	
 }
 
 
 commands::parser::setConf($irc, $dbh, $log);
+
+$sites::parser::dbh = $dbh;
+$sites::parser::irc = $irc;
+$sites::parser::log = $log;
 
 # Boucle des events
 $poe_kernel->run();

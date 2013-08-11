@@ -10,11 +10,18 @@ use soundcloud;
 use mixcloud;
 use zippy;
 
+our $irc;
+our $dbh;
+our $log;
 
 sub parse {
-    my $msg = shift;
-    my %content;
+	my ($kernel, $user, $chan, $msg) = @_;
+	my ($nick,$mask) = split(/!/,$user);
 
+    my %content;
+    my $id;
+
+    # parsing
     if ($msg =~ m#(?:^|[^!])https?://(?:www.youtube.com/watch\?[a-zA-Z0-9_=&-]*v=|youtu.be/)([a-zA-Z0-9_-]+)#) {
 		eval { %content = youtube::get($1) };
 
@@ -37,5 +44,48 @@ sub parse {
 		$content{'site'} = 'zippyshare';
 	}
 
-    return %content;
+    # something goes wrong ?
+    if ($@) {
+        $log->warning ($@);
+        return;
+    }
+
+    # if we get a new content, we must save it
+    if (%content) {
+	    if ($debug) {
+		    $log->debug($content{'url'});
+	    }
+	    else {
+		    # insertion de la vidéo dans la bdd
+		    my $sth = $dbh->prepare_cached('INSERT INTO playbot (date, type, url, sender_irc, sender, title, chan) VALUES (NOW(),?,?,?,?,?,?)');
+		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+		    $sth->execute($content{'site'}, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan->[0])
+			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+	    }
+
+	    # sélection de l'id de la vidéo insérée
+	    $id = $dbh->{mysql_insert_id};
+	    if (!$id) {
+		    my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
+		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+		    $sth->execute($content{'url'})
+			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+		    $id = $sth->fetch->[0];
+	    }
+
+	    # message sur irc
+	    if (defined $content{'author'}) {
+		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}.' | '.$content{'author'}) ;
+	    }
+	    else {
+		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
+	    }
+    }
+
+    return $id;
 }
+
+1;
