@@ -59,8 +59,6 @@ my $dbh = DBI->connect('DBI:mysql:'.$conf->{'bdd'}.';host='.$conf->{'host'}, $co
 	})
 	or die("Couldn't connect to database: ".DBI->errstr);
 
-$commands::parser::setConf($irc, $dbh);
-
 # Evenements que le bot va gérer
 POE::Session->create(
 	inline_states => {
@@ -128,7 +126,7 @@ sub cycle
 
     Module::Refresh->refresh;
 
-    $commands::parser::setConf($irc, $dbh);
+    commands::parser::setConf($irc, $dbh, $log);
     $commands::parser::lastID = $lastID;
 }
 
@@ -305,6 +303,8 @@ sub on_speak
     }	
 }
 
+
+commands::parser::setConf($irc, $dbh, $log);
 
 # Boucle des events
 $poe_kernel->run();

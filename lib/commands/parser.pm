@@ -14,10 +14,13 @@ our $lastID;
 my $irc;
 
 sub setConf {
-    my ($ircNew, $dbh) = @_;
+    my ($ircNew, $dbh, $log) = @_;
 
     $commands::fav::dbh = $dbh;
     $commands::tag::dbh = $dbh;
+
+    $commands::fav::log = $log;
+    $commands::tag::log = $log;
 
     $irc = $ircNew;
 }
@@ -29,19 +32,18 @@ sub exec {
     if ($msg =~ /^!fav(?: ([0-9]+))?/) {
         $id = ($1) ? $1 : $lastID;
 
-        $commands::fav::dbh = $dbh;
         commands::fav::exec($nick, $id)
 	}
 	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
         my $id = ($1) ? $1 : $lastID;
         my ($time, $unit) = ($2, $3);
 
-        commands::later::exec($id, $time, $unit);
+        commands::later::exec($kernel, $nick, $id, $time, $unit);
 	}
     elsif ($msg =~ /^!tag(?: +([0-9]+))?/) {
         my $id = ($1) ? $1 : $lastID;
 
-        commands::tag($id, $msg);
+        commands::tag::exec($id, $msg);
     }
     elsif ($msg =~ /^!help/) {
 		$irc->yield(privmsg => $chan => '!fav [<id>] : enregistre la vidéo dans les favoris');
@@ -59,7 +61,7 @@ sub exec {
 sub tag {
     my ($msg) = @_;
 
-    commands::tag($lastID, $msg);
+    commands::tag::exec($lastID, $msg);
 }
 
 1;

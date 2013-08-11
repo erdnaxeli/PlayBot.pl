@@ -1,11 +1,11 @@
-package commands::later;
+package commands::tag;
 
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(exec);
 
-our $kernel;
 our $dbh;
+our $log;
 
 sub exec {
     my ($id, $msg) = @_;
