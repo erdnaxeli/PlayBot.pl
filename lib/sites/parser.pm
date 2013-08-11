@@ -15,10 +15,11 @@ sub parse {
     my $msg = shift;
     my %content;
 
-    if ($msg =~ m#(^|[^!])https?://(www.youtube.com/watch\?[a-zA-Z0-9_=&-]*v=|youtu.be/)([a-zA-Z0-9_-]+)#) {
-		my $url = 'https://www.youtube.com/watch?v='.$3;
-		eval { %content = youtube($url) };
+    if ($msg =~ m#(?:^|[^!])https?://(?:www.youtube.com/watch\?[a-zA-Z0-9_=&-]*v=|youtu.be/)([a-zA-Z0-9_-]+)#) {
+		eval { %content = youtube($1) };
+
 		$content{'site'} = 'youtube';
+        $content{'url'} = 'https://www.youtube.com/watch?v='.$1;
 	}
 	elsif ($msg =~ m#(^|[^!])https?://soundcloud.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)#) {
 		my $url = 'https://www.soundcloud.com/'.$2;
