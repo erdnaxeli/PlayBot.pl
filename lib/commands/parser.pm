@@ -7,13 +7,20 @@ our @EXPORT_OK = qw(exec);
 use lib "$FindBin::Bin/lib/";
 use commands::fav;
 use commands::later;
-#use later;
-#use tag;
-#use help;
+use commands::tag;
 
-our $irc;
-our $dbh;
 our $lastID;
+
+my $irc;
+
+sub setConf {
+    my ($ircNew, $dbh) = @_;
+
+    $commands::fav::dbh = $dbh;
+    $commands::tag::dbh = $dbh;
+
+    $irc = $ircNew;
+}
 
 sub exec {
 	my ($kernel, $user, $chan, $msg) = @_;
@@ -29,7 +36,7 @@ sub exec {
         my $id = ($1) ? $1 : $lastID;
         my ($time, $unit) = ($2, $3);
 
-        commands::later::exec ($id, $time, $unit);
+        commands::later::exec($id, $time, $unit);
 	}
     elsif ($msg =~ /^!tag( +([0-9]+))?/) {
         my $id = ($2) ? $2 : $lastID;
