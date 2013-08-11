@@ -32,7 +32,7 @@ my $admin = 'moise';
 my $baseurl = 'http://nightiies.iiens.net/links/';
 my @nicksToVerify;
 my @codesToVerify;
-my $lastID;
+my %lastID;
 
 my $debug = 0;
 
@@ -127,7 +127,7 @@ sub cycle
     Module::Refresh->refresh;
 
     commands::parser::setConf($irc, $dbh, $log);
-    $commands::parser::lastID = $lastID;
+    %commands::parser::lastID = %lastID;
 }
 
 
@@ -286,11 +286,11 @@ sub on_speak
 
 		        $id = $sth->fetch->[0];
 	        }
-	        $lastID = $id;
-            $commands::parser::lastID = $id;
+	        $lastID{$chan->[0]} = $id;
+            $commands::parser::lastID{$chan->[0]} = $id;
 
 	        # insertion des éventuels tags
-            commands::parser::tag($msg);
+            commands::parser::tag($msg, $chan);
 
 	        # message sur irc
 	        if (defined $content{'author'}) {

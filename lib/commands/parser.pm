@@ -9,7 +9,7 @@ use commands::fav;
 use commands::later;
 use commands::tag;
 
-our $lastID;
+our %lastID;
 
 my $irc;
 
@@ -30,18 +30,18 @@ sub exec {
 	my ($nick,$mask) = split(/!/,$user);
 
     if ($msg =~ /^!fav(?: ([0-9]+))?/) {
-        $id = ($1) ? $1 : $lastID;
+        $id = ($1) ? $1 : $lastID{$chan->[0]};
 
         commands::fav::exec($nick, $id)
 	}
 	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
-        my $id = ($1) ? $1 : $lastID;
+        my $id = ($1) ? $1 : $lastID{$chan->[0]};
         my ($time, $unit) = ($2, $3);
 
         commands::later::exec($kernel, $nick, $id, $time, $unit);
 	}
     elsif ($msg =~ /^!tag(?: +([0-9]+))?/) {
-        my $id = ($1) ? $1 : $lastID;
+        my $id = ($1) ? $1 : $lastID{$chan->[0]};
 
         commands::tag::exec($id, $msg);
     }
@@ -59,9 +59,9 @@ sub exec {
 }
 
 sub tag {
-    my ($msg) = @_;
+    my ($msg, $chan) = @_;
 
-    commands::tag::exec($lastID, $msg);
+    commands::tag::exec($lastID{$chan->[0]}, $msg);
 }
 
 1;
