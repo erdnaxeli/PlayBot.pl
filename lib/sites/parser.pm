@@ -12,7 +12,7 @@ use zippy qw(zippy);
 
 
 sub parse {
-    my $msg = @_[0];
+    my $msg = shift;
     my %content;
 
     if ($msg =~ m#(^|[^!])https?://(www.youtube.com/watch\?[a-zA-Z0-9_=&-]*v=|youtu.be/)([a-zA-Z0-9_-]+)#) {
