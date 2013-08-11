@@ -8,7 +8,7 @@ use POSIX 'strftime';
 use DBI;
 use Tie::File;
 use JSON;
-use Module::Refresh;
+use Module::Reload;
 use FindBin;
 
 use lib "$FindBin::Bin/lib/";
@@ -124,7 +124,7 @@ sub cycle
 
 	$log->info("refresh modules");
 
-    Module::Refresh->refresh;
+    Module::Reload->check;
 
     commands::parser::setConf($irc, $dbh, $log);
     %commands::parser::lastID = %lastID;
