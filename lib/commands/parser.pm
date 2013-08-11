@@ -6,12 +6,14 @@ our @EXPORT_OK = qw(exec);
 
 use lib "$FindBin::Bin/lib/";
 use commands::fav;
+use commands::later;
 #use later;
 #use tag;
 #use help;
 
 our $irc;
 our $dbh;
+our $lastID;
 
 sub exec {
 	my ($kernel, $user, $chan, $msg) = @_;
@@ -23,12 +25,10 @@ sub exec {
         commands::fav::exec($2)
 	}
 	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
-		my ($id, $time, $unit) = ($1, $2, $3);
+        my $id = ($1) ? $1 : $lastID;
+        my ($time, $unit) = ($2, $3);
 
-		$id = $lastID if (!$id);
-		$time = 6 if (!$time);
-		$time *= ($unit eq 's') ? 1 : ($unit eq 'm') ? 60 : 3600;
-		$kernel->delay_set('_later', $time, $nick, $id);
+        commands::later::exec ($id, $time, $unit);
 	}
     elsif ($msg =~ /^!tag( +([0-9]+))?/) {
         my $id = ($2) ? $2 : $lastID;
