@@ -23,7 +23,7 @@ sub exec {
             where tag in ('.$params.')
             group by id
             having count(*) >= ?');
-        $sth->execute(@tags, length @tags);
+        $sth->execute(@tags, scalar @tags);
 
         $content = $sth->fetchall_arrayref;
 
