@@ -38,12 +38,8 @@ sub exec {
     }
     else {
         my $sth = $dbh->prepare('select id, sender, title, url from playbot
-            join (
-                select floor ((max(id) - min(id)) * rand()) + min(id) as randomValue
-                from playbot
-                )
-            as v on playbot.id >= v.randomValue
             where chan = ?
+            order by rand()
             limit 1');
         $sth->execute($chan->[0]);
         $content = $sth->fetch;
