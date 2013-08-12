@@ -21,7 +21,7 @@ sub exec {
         my $sth = $dbh->prepare('select id, sender, title, url from playbot
             natural join playbot_tags
             where tag in ('.$params.')
-            and where chan = ?
+            and chan = ?
             group by id
             having count(*) >= ?');
         $sth->execute(@tags, $chan->[0], scalar @tags);
