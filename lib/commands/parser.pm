@@ -24,6 +24,7 @@ sub setConf {
     $commands::fav::log = $log;
     $commands::tag::log = $log;
 
+    $commands::fav::irc = $ircNew;
     $commands::get::irc = $ircNew;
 
     $irc = $ircNew;

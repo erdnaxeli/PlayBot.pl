@@ -6,6 +6,7 @@ our @EXPORT_OK = qw(exec);
 
 our $dbh;
 our $log;
+our $irc;
 
 sub exec {
     my ($nick, $id) = @_;
