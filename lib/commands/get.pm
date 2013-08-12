@@ -60,6 +60,8 @@ sub exec {
     else {
     	$irc->yield(privmsg => $chan => '['.$content->[0].'] '.$content->[2].' => '.$content->[3]) ;
     }
+
+    return $content->[0];
 }
 
 1;
