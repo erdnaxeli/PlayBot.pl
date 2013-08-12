@@ -49,7 +49,15 @@ sub exec {
         commands::later::exec($kernel, $nick, $id, $time, $unit);
 	}
     elsif ($msg =~ /^!tag(?: +([0-9]+))?/) {
-        my $id = ($1) ? $1 : $lastID{$chan->[0]};
+        my $id = $1;
+
+        if ($id) {
+            $msg = substr $msg, 4 + length $id;
+        }
+        else {
+            $id = $lastID{$chan->[0]};
+            $msg = substr $msg, 4;
+        }
 
         commands::tag::exec($id, $msg);
     }
