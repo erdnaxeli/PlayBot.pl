@@ -38,10 +38,10 @@ sub exec {
     else {
         my $sth = $dbh->prepare('select id, sender, title, url from playbot
             join (
-                select floor( count(*) * rand() ) as randomValue
+                select floor( max(id) * rand() ) as randomValue
                 from playbot
                 )
-            as v on playbot.id = v.randomValue
+            as v on playbot.id >= v.randomValue
             limit 1');
         $sth->execute;
         $content = $sth->fetch;
