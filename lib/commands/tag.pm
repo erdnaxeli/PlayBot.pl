@@ -9,6 +9,8 @@ our $log;
 
 sub exec {
     my ($id, $msg) = @_;
+    $msg = substr $msg, 4;
+
     while ($msg =~ /#?([a-zA-Z0-9_-]+)/g) {
         addTag($id, $1);
     }
