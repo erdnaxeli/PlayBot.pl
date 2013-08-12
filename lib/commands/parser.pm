@@ -8,6 +8,7 @@ use lib "$FindBin::Bin/lib/";
 use commands::fav;
 use commands::later;
 use commands::tag;
+use commands::get;
 
 our %lastID;
 
@@ -18,15 +19,19 @@ sub setConf {
 
     $commands::fav::dbh = $dbh;
     $commands::tag::dbh = $dbh;
+    $commands::get::dbh = $dbh;
 
     $commands::fav::log = $log;
     $commands::tag::log = $log;
+
+    $commands::get::irc = $ircNew;
 
     $irc = $ircNew;
 }
 
 sub exec {
-	my ($kernel, $user, $chan, $msg) = @_;
+    my @args = @_;
+	my ($kernel, $user, $chan, $msg) = @args;
 	my ($nick,$mask) = split(/!/,$user);
 
     if ($msg =~ /^!fav(?: ([0-9]+))?/) {
@@ -45,11 +50,16 @@ sub exec {
 
         commands::tag::exec($id, $msg);
     }
+    elsif ($msg =~ /^!get/) {
+        commands::get::exec(@args);
+    }
     elsif ($msg =~ /^!help/) {
 		$irc->yield(privmsg => $nick => '!fav [<id>] : enregistre la vidéo dans les favoris');
 		$irc->yield(privmsg => $nick => '!tag [<id>] <tag1> <tag2> ... : tag la vidéo');
 		$irc->yield(privmsg => $nick => '!later [<id>] [in <x>[s|m|h]] : vidéo rappelée par query (par défaut temps de 6h)');
-		$irc->yield(privmsg => $nick => 'Sans id précisée, la dernière vidéo postée sur le chan est utilisée.');
+		$irc->yield(privmsg => $nick => '!get [<tags>] : sort aléatoirement une vidéo');
+		$irc->yield(privmsg => $nick => "Sans id précisée, la dernière vidéo *postée* sur le chan est utilisée (un !get n'est pas pris en compte.");
+		$irc->yield(privmsg => $nick => "Un tag est de la forme « #[a-zA-Z0-9_-]+ ». Par exemple « #loLILol-mdr_lol42 » est un tag valide, tandis que « #céducaca » n'en ai pas un (seul « #c » sera considéré).");
     }
     else {
         return 0;
