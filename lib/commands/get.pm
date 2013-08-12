@@ -13,7 +13,7 @@ our $irc;
 sub exec {
 	my ($kernel, $user, $chan, $msg) = @_;
 
-    my @tags = ($msg =~ /#([a-zA-Z0-9_-]+)/g);
+    my @tags = ($msg =~ /#?([a-zA-Z0-9_-]+)/g);
     my $content;
 
     if (@tags) {
