@@ -21,9 +21,10 @@ sub exec {
         my $sth = $dbh->prepare('select id, sender, title, url from playbot
             natural join playbot_tags
             where tag in ('.$params.')
+            and where chan = ?
             group by id
             having count(*) >= ?');
-        $sth->execute(@tags, scalar @tags);
+        $sth->execute(@tags, $chan->[0], scalar @tags);
 
         $content = $sth->fetchall_arrayref;
 
@@ -42,12 +43,13 @@ sub exec {
                 from playbot
                 )
             as v on playbot.id >= v.randomValue
+            where chan = ?
             limit 1');
-        $sth->execute;
+        $sth->execute($chan->[0]);
         $content = $sth->fetch;
         
         if (!$content) {
-            $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
+            $irc->yield(privmsg => $chan => "Poste d'abord du contenu, n00b.");
             return
         }
     }
