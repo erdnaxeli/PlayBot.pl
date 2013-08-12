@@ -52,7 +52,7 @@ sub exec {
         my $id = $1;
 
         if ($id) {
-            $msg = substr $msg, 4 + length $id;
+            $msg = substr $msg, 4 + length $id + 1;
         }
         else {
             $id = $lastID{$chan->[0]};
