@@ -57,8 +57,15 @@ sub exec {
         group by id");
     $sth->execute($content->[0]);
 
-    my $tags = $sth->fetch->[0];
-    $tags =~ s/([a-zA-Z0-9_-]+)/#$1/g;
+    my $tags = $sth->fetch;
+
+    if ($tags) {
+        $tags = $tags->[0];
+        $tags =~ s/([a-zA-Z0-9_-]+)/#$1/g;
+    }
+    else {
+        $tags = "";
+    }
 
     if ($content->[1]) {
     	$irc->yield(privmsg => $chan => '['.$content->[0].'] '.$content->[2].' | '.$content->[1].' => '.$content->[3].' '.$tags) ;
