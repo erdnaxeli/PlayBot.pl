@@ -85,8 +85,9 @@ sub exec {
 
 sub tag {
     my ($msg, $chan) = @_;
+    my @tags = ($msg =~ /#([a-zA-Z0-9_-]+)/g);
 
-    commands::tag::exec($lastID{$chan->[0]}, $msg);
+    commands::tag::exec($lastID{$chan->[0]}, "@tags");
 }
 
 1;
