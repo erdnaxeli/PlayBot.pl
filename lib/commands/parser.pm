@@ -37,18 +37,18 @@ sub exec {
 	my ($kernel, $user, $chan, $msg) = @args;
 	my ($nick, $mask) = split(/!/,$user);
 
-    if ($msg =~ /^!fav(?: ([0-9]+))?/) {
+    if ($msg =~ /^ *!fav(?: ([0-9]+))?/) {
         my $id = ($1) ? $1 : $lastID{$chan->[0]};
 
         commands::fav::exec($nick, $id)
 	}
-	elsif ($msg =~ /^!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
+	elsif ($msg =~ /^ *!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
         my $id = ($1) ? $1 : $lastID{$chan->[0]};
         my ($time, $unit) = ($2, $3);
 
         commands::later::exec($kernel, $nick, $id, $time, $unit);
 	}
-    elsif ($msg =~ /^!tag(?: +([0-9]+))?/) {
+    elsif ($msg =~ /^ *!tag(?: +([0-9]+))?/) {
         my $id = $1;
 
         if ($id) {
@@ -61,14 +61,14 @@ sub exec {
 
         commands::tag::exec($id, $msg);
     }
-    elsif ($msg =~ /^!get/) {
+    elsif ($msg =~ /^ *!get/) {
         my $id = commands::get::exec(@args);
 
         if ($id) {
             $lastID{$chan->[0]} = $id;
         }
     }
-    elsif ($msg =~ /^!help/) {
+    elsif ($msg =~ /^ *!help/) {
 		$irc->yield(privmsg => $nick => '!fav [<id>] : enregistre la vidéo dans les favoris');
 		$irc->yield(privmsg => $nick => '!tag [<id>] <tag1> <tag2> ... : tag la vidéo');
 		$irc->yield(privmsg => $nick => '!later [<id>] [in <x>[s|m|h]] : vidéo rappelée par query (par défaut temps de 6h)');
