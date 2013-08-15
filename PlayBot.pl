@@ -114,6 +114,9 @@ sub later
 
 		$irc->yield(privmsg => $nick => '['.$id.'] '.$donnees[2].' | '.$donnees[1]);
 		$irc->yield(privmsg => $nick => $donnees[0]);
+    
+	    $lastID{$nick} = $id;
+        $commands::parser::lastID{$nick} = $id;
 	}
 }
 
