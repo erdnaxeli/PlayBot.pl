@@ -35,7 +35,7 @@ sub setConf {
 sub exec {
     my @args = @_;
 	my ($kernel, $user, $chan, $msg) = @args;
-	my ($nick,$mask) = split(/!/,$user);
+	my ($nick, $mask) = split(/!/,$user);
 
     if ($msg =~ /^!fav(?: ([0-9]+))?/) {
         my $id = ($1) ? $1 : $lastID{$chan->[0]};

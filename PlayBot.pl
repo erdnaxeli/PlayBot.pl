@@ -174,9 +174,14 @@ sub on_connect
 # Discussion privée
 sub on_query
 {
-	my ($user,$msg) = @_[ARG0, ARG2];
+	my ($kernel, $user, $msg) = @_[KERNEL, ARG0, ARG2];
 	my ($nick) = split (/!/,$user);
-	print $msg."\n";
+
+    my @fake_chan = ($nick);
+    my @args = ($kernel, $user, \@fake_chan, $msg);
+
+    my $fake_chan = \@fake_chan;
+    return if (commands::parser::exec(@args));
 
 	if ($msg =~ m/^!/ && $nick eq $admin) {
 		my $commande = ( $msg =~ m/^!([^ ]*)/ )[0]; 

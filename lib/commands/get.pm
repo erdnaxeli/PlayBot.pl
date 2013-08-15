@@ -17,15 +17,30 @@ sub exec {
     my @tags = ($msg =~ /#?([a-zA-Z0-9_-]+)/g);
     my $content;
 
+    # if we are in a query, we search in all the channels
+    my $all = ($chan->[0] !~ /^#/) ? 1 : 0;
+
     if (@tags) {
         my $params = join ', ' => ('?') x @tags;
-        my $sth = $dbh->prepare('select id, sender, title, url from playbot
-            natural join playbot_tags
-            where tag in ('.$params.')
-            and chan = ?
-            group by id
-            having count(*) >= ?');
-        $sth->execute(@tags, $chan->[0], scalar @tags);
+        my $sth;
+
+        if ($all) {
+            $sth = $dbh->prepare('select id, sender, title, url from playbot
+                natural join playbot_tags
+                where tag in ('.$params.')
+                group by id
+                having count(*) >= ?');
+            $sth->execute(@tags, scalar @tags);
+        }
+        else {
+            $sth = $dbh->prepare('select id, sender, title, url from playbot
+                natural join playbot_tags
+                where tag in ('.$params.')
+                and chan = ?
+                group by id
+                having count(*) >= ?');
+            $sth->execute(@tags, $chan->[0], scalar @tags);
+        }
 
         $content = $sth->fetchall_arrayref;
 
@@ -38,11 +53,22 @@ sub exec {
         }
     }
     else {
-        my $sth = $dbh->prepare('select id, sender, title, url from playbot
-            where chan = ?
-            order by rand()
-            limit 1');
-        $sth->execute($chan->[0]);
+        my $sth;
+
+        if ($all) {
+            $sth = $dbh->prepare('select id, sender, title, url from playbot
+                order by rand()
+                limit 1');
+            $sth->execute;
+        }
+        else {
+            $sth = $dbh->prepare('select id, sender, title, url from playbot
+                where chan = ?
+                order by rand()
+                limit 1');
+            $sth->execute($chan->[0]);
+        }
+
         $content = $sth->fetch;
         
         if (!$content) {
