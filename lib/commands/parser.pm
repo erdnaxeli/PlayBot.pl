@@ -33,8 +33,7 @@ sub setConf {
 }
 
 sub exec {
-    my @args = @_;
-	my ($kernel, $user, $chan, $msg) = @args;
+	my ($kernel, $user, $chan, $msg) = @_;
 	my ($nick, $mask) = split(/!/,$user);
 
     if ($msg =~ /^ *!fav(?: ([0-9]+))?/) {
@@ -48,20 +47,22 @@ sub exec {
 
         commands::later::exec($kernel, $nick, $id, $time, $unit);
 	}
-    elsif ($msg =~ /^ *!tag(?: +([0-9]+))?/) {
-        my $id = $1;
+    elsif ($msg =~ /^( *!tag)(?:( +)([0-9]+))?/) {
+        my $id = $3;
 
         if ($id) {
-            $msg = substr $msg, 4 + (length $id) + 1;
+            $msg = substr $msg, (length $1) + (length $2) + (length $id);
         }
         else {
             $id = $lastID{$chan->[0]};
-            $msg = substr $msg, 4;
+            $msg = substr $msg, (length $1) + (length $2);
         }
 
         commands::tag::exec($id, $msg);
     }
-    elsif ($msg =~ /^ *!get/) {
+    elsif ($msg =~ /^( *!get)/) {
+        $msg = substr $msg, length $1;
+        my @args = ($kernel, $user, $chan, $msg);
         my $id = commands::get::exec(@args);
 
         if ($id) {
