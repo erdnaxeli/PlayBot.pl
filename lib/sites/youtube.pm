@@ -16,7 +16,11 @@ sub get {
     $infos{'title'} = $video->title;
     $infos{'author'} = $video->uploader;
 	$infos{'url'} = $video->base_uri;
-	
+
+    my $context = $video->description . ' ' . $video->title;
+    $context =~ s/[[:punct:]]//g;
+    $infos{'context'} = $context;
+
 	return %infos;
 }
 
