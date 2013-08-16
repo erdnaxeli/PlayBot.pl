@@ -256,7 +256,7 @@ sub on_invite
 	$log->info($nick . " m'invite sur ". $chan);
 	$irc->yield(join => $chan);
 
-    unshift @channels, $chan->[0];
+    push @channels, $chan;
 }
 
 # Quand un user parle
