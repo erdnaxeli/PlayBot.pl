@@ -2,6 +2,7 @@ package soundcloud;
 
 use LWP::UserAgent;
 use JSON;
+use URI::Find;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -29,8 +30,13 @@ sub get {
 		$infos{'ddl'} = $content->{'download_url'};
 	}
     
-    my $context = $content->{'tag_list'} . ' ' . $content->{'description'} . ' ' . $infos{'title'};
+    my $context = $content->{'tag_list'}.' '.$content->{'description'}.' '.$infos{'title'};
+    my $finder = URI::Find->new( sub { '' } );
+
+    # we remove the URI and the punctuation
+    $finder->find(\$context);
     $context =~ s/[[:punct:]]//g;
+
     $infos{'context'} = $context;
 	
 	return %infos;

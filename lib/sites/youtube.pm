@@ -1,6 +1,7 @@
 package youtube;
 
 use WebService::GData::YouTube;
+use URI::Find;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -18,7 +19,12 @@ sub get {
 	$infos{'url'} = $video->base_uri;
 
     my $context = $video->description . ' ' . $video->title;
+    my $finder = URI::Find->new( sub { '' } );
+
+    # we remove the URI and the punctuation
+    $finder->find(\$context);
     $context =~ s/[[:punct:]]//g;
+
     $infos{'context'} = $context;
 
 	return %infos;
