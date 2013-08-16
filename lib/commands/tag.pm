@@ -4,6 +4,8 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(exec);
 
+use Lingua::StopWords qw(getStopWords);
+
 our $dbh;
 our $log;
 
@@ -27,6 +29,10 @@ sub addContext
 sub addTag
 {
     my ($id, $tag, $context) = @_;
+    my $stopwords_en = getStopWords('en');
+    my $stopwords_fr = getStopWords('fr');
+
+    return if ($stopwords_en->{$tag} or $stopwords_fr->{$tag});
 
     my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag, context) VALUES (?, ?, ?)');
 	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
