@@ -32,7 +32,7 @@ sub addTag
     my $stopwords_en = getStopWords('en');
     my $stopwords_fr = getStopWords('fr');
 
-    return if ($stopwords_en->{$tag} or $stopwords_fr->{$tag});
+    return if ($stopwords_en->{lc $tag} or $stopwords_fr->{lc $tag});
 
     my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag, context) VALUES (?, ?, ?)');
 	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
