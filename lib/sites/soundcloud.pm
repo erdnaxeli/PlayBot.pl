@@ -28,6 +28,10 @@ sub get {
 	if ($content->{'downloadable'}) {
 		$infos{'ddl'} = $content->{'download_url'};
 	}
+    
+    my $context = $content->{'tag_list'} . ' ' . $content->{'description'} . ' ' . $infos{'title'};
+    $context =~ s/[[:punct:]]//g;
+    $infos{'context'} = $context;
 	
 	return %infos;
 }
