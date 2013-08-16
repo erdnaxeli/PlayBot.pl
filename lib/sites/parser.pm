@@ -10,6 +10,9 @@ use soundcloud;
 use mixcloud;
 use zippy;
 
+use lib "$FindBin::Bin/lib/";
+use commands::tag;
+
 our $irc;
 our $dbh;
 our $log;
@@ -83,6 +86,10 @@ sub parse {
 	    else {
 		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
 	    }
+
+        if (defined $content{'context'}) {
+            commands::tag::addContext($id, $content{'context'});
+        }
     }
 
     return $id;

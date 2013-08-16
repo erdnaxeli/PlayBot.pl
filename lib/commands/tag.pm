@@ -15,14 +15,23 @@ sub exec {
     }
 }
 
+sub addContext
+{
+    my ($id, $msg) = @_;
+
+    while ($msg =~ /#?([a-zA-Z0-9_-]+)/g) {
+        addTag($id, $1, 1);
+    }
+}
+
 sub addTag
 {
-    my ($id, $tag) = @_;
+    my ($id, $tag, $context) = @_;
 
-    my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
+    my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag, context) VALUES (?, ?, ?)');
 	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-	$sth->execute($id, $tag)
+	$sth->execute($id, $tag, ($context) ? 1 : 0)
 		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 }
 
