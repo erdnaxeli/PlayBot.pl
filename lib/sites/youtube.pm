@@ -25,7 +25,7 @@ sub get {
 
     # we remove the URI and the punctuation
     $finder->find(\$context);
-    $context =~ s/[[:punct:]]//g;
+    $context =~ s/[[:punct:]]/ /g;
 
     $infos{'context'} = $context;
 
