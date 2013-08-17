@@ -2,6 +2,8 @@ package youtube;
 
 use WebService::GData::YouTube;
 use URI::Find;
+use Encode;
+require Encode::Detect;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -14,11 +16,11 @@ sub get {
     my $video = $yt->get_video_by_id($id);
 
     my %infos;
-    $infos{'title'} = $video->title;
+    $infos{'title'} = decode("Detect", $video->title);
     $infos{'author'} = $video->uploader;
 	$infos{'url'} = $video->base_uri;
 
-    my $context = $video->description . ' ' . $video->title;
+    my $context = decode("Detect", $video->description) . ' ' . $infos{'title'};
     my $finder = URI::Find->new( sub { '' } );
 
     # we remove the URI and the punctuation
