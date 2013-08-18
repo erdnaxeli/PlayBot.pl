@@ -116,7 +116,6 @@ sub later
 		$irc->yield(privmsg => $nick => $donnees[0]);
     
 	    $lastID{$nick} = $id;
-        $commands::parser::lastID{$nick} = $id;
 	}
 }
 
@@ -129,8 +128,13 @@ sub cycle
 
     Module::Reload->check;
 
-    commands::parser::setConf($irc, $dbh, $log);
-    %commands::parser::lastID = %lastID;
+    setConf();
+}
+
+
+sub setConf 
+{
+    commands::parser::setConf($irc, $dbh, $log, \%lastID);
 
     $sites::parser::dbh = $dbh;
     $sites::parser::irc = $irc;
@@ -276,7 +280,6 @@ sub on_speak
         if ($id) {
             # if yes, we need to save the new content's id
 	        $lastID{$chan->[0]} = $id;
-            $commands::parser::lastID{$chan->[0]} = $id;
 
 	        # we insert the potiential tags
             commands::parser::tag($msg, $chan);
@@ -285,11 +288,7 @@ sub on_speak
 }
 
 
-commands::parser::setConf($irc, $dbh, $log);
-
-$sites::parser::dbh = $dbh;
-$sites::parser::irc = $irc;
-$sites::parser::log = $log;
+setConf();
 
 # Boucle des events
 $poe_kernel->run();

@@ -12,12 +12,11 @@ use commands::later;
 use commands::tag;
 use commands::get;
 
-our %lastID;
-
+my $lastID;
 my $irc;
 
 sub setConf {
-    my ($ircNew, $dbh, $log) = @_;
+    my ($ircNew, $dbh, $log, $lastIDnew) = @_;
 
     $commands::fav::dbh = $dbh;
     $commands::tag::dbh = $dbh;
@@ -32,6 +31,7 @@ sub setConf {
     $commands::get::irc = $ircNew;
 
     $irc = $ircNew;
+    $lastID = $lastIDnew;
 }
 
 sub exec {
@@ -39,12 +39,12 @@ sub exec {
 	my ($nick, $mask) = split(/!/,$user);
 
     if ($msg =~ /^ *!fav(?: ([0-9]+))?/) {
-        my $id = ($1) ? $1 : $lastID{$chan->[0]};
+        my $id = ($1) ? $1 : $lastID->{$chan->[0]};
 
         commands::fav::exec($nick, $id)
 	}
 	elsif ($msg =~ /^ *!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
-        my $id = ($1) ? $1 : $lastID{$chan->[0]};
+        my $id = ($1) ? $1 : $lastID->{$chan->[0]};
         my ($time, $unit) = ($2, $3);
 
         commands::later::exec($kernel, $nick, $id, $time, $unit);
@@ -56,7 +56,7 @@ sub exec {
             $msg = substr $msg, (length $1) + (length $2) + (length $id);
         }
         else {
-            $id = $lastID{$chan->[0]};
+            $id = $lastID->{$chan->[0]};
             $msg = substr $msg, (length $1) + (length $2);
         }
 
@@ -68,7 +68,7 @@ sub exec {
         my $id = commands::get::exec(@args);
 
         if ($id) {
-            $lastID{$chan->[0]} = $id;
+            $lastID->{$chan->[0]} = $id;
         }
     }
     elsif ($msg =~ /^ *!help/) {
@@ -90,7 +90,7 @@ sub tag {
     my ($msg, $chan) = @_;
     my @tags = ($msg =~ /#([a-zA-Z0-9_-]+)/g);
 
-    commands::tag::exec($lastID{$chan->[0]}, "@tags");
+    commands::tag::exec($lastID->{$chan->[0]}, "@tags");
 }
 
 1;
