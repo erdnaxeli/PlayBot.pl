@@ -22,9 +22,11 @@ sub setConf {
     $commands::fav::dbh = $dbh;
     $commands::tag::dbh = $dbh;
     $commands::get::dbh = $dbh;
+    $commands::later::dbh = $dbh;
 
     $commands::fav::log = $log;
     $commands::tag::log = $log;
+    $commands::later::log = $log;
 
     $commands::fav::irc = $ircNew;
     $commands::get::irc = $ircNew;
