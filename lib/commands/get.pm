@@ -50,7 +50,7 @@ sub exec {
 
         $content = $sth->fetch;
 
-        if (!@{$content}) {
+        if (!$content) {
             $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
             return
         }
