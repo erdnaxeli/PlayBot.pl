@@ -84,7 +84,11 @@ sub flux
 	my $date = strftime ("%Y-%m-%d", localtime(time - 3600*24));
 
     foreach (@channels) {
-	    my $sth = $dbh->prepare_cached('SELECT COUNT(*) FROM playbot WHERE date = ? and chan = ?');
+	    my $sth = $dbh->prepare_cached('
+            SELECT COUNT(*)
+            FROM playbot p
+            JOIN playbot_chan pc ON p.id = pc.content
+            WHERE date = ? and chan = ?');
 	    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 	    $sth->execute($date, $_)
 		    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
