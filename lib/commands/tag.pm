@@ -34,7 +34,10 @@ sub addTag
 
     return if ($stopwords_en->{lc $tag} or $stopwords_fr->{lc $tag});
 
-    my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag, context) VALUES (?, ?, ?)');
+    my $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag, context)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY
+        UPDATE context = 0');
 	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
 	$sth->execute($id, $tag, ($context) ? 1 : 0)
