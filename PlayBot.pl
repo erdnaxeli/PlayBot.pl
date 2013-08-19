@@ -290,6 +290,8 @@ sub on_speak
 
 setConf();
 
+$irc->yield(privmsg => "NickServ" => "identify ".$conf->{'nickserv_pwd'}) unless ($debug);
+
 # Boucle des events
 $poe_kernel->run();
 exit 0;
