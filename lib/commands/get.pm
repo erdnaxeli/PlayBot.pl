@@ -24,7 +24,8 @@ sub exec {
         my $sth;
 
         if ($all) {
-            $sth = $dbh->prepare('select id, sender, title, url from playbot
+            $sth = $dbh->prepare('select id, sender, title, url
+                from playbot
                 natural join playbot_tags
                 where tag in ('.$params.')
                 group by id
@@ -32,11 +33,13 @@ sub exec {
             $sth->execute(@tags, scalar @tags);
         }
         else {
-            $sth = $dbh->prepare('select id, sender, title, url from playbot
-                natural join playbot_tags
-                where tag in ('.$params.')
-                and chan = ?
-                group by id
+            $sth = $dbh->prepare('select p.id, p.sender, p.title, p.url
+                from playbot p
+                natural join playbot_tags pt
+                join playbot_chan pc on p.id = pc.content
+                where pt.tag in ('.$params.')
+                and pc.chan = ?
+                group by p.id
                 having count(*) >= ?');
             $sth->execute(@tags, $chan->[0], scalar @tags);
         }
@@ -61,8 +64,10 @@ sub exec {
             $sth->execute;
         }
         else {
-            $sth = $dbh->prepare('select id, sender, title, url from playbot
-                where chan = ?
+            $sth = $dbh->prepare('select p.id, p.sender, p.title, p.url
+                from playbot p
+                join playbot_chan pc on p.id = pc.content
+                where pc.chan = ?
                 order by rand()
                 limit 1');
             $sth->execute($chan->[0]);
