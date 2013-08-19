@@ -29,7 +29,9 @@ sub exec {
                 natural join playbot_tags
                 where tag in ('.$params.')
                 group by id
-                having count(*) >= ?');
+                having count(*) >= ?
+                order by rand()
+                limit 1');
             $sth->execute(@tags, scalar @tags);
         }
         else {
@@ -40,18 +42,17 @@ sub exec {
                 where pt.tag in ('.$params.')
                 and pc.chan = ?
                 group by p.id
-                having count(*) >= ?');
+                having count(*) >= ?
+                order by rand()
+                limit 1');
             $sth->execute(@tags, $chan->[0], scalar @tags);
         }
 
-        $content = $sth->fetchall_arrayref;
+        $content = $sth->fetch;
 
         if (!@{$content}) {
             $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
             return
-        }
-        else {
-            $content = $content->[rand @{$content}];
         }
     }
     else {
