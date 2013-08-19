@@ -62,10 +62,10 @@ sub parse {
 		    # insertion de la vidéo dans la bdd
 		    my $sth = $dbh->prepare_cached('
                 INSERT INTO playbot (date, type, url, sender_irc, sender, title)
-                VALUES (NOW(),?,?,?,?,?,?)');
+                VALUES (NOW(),?,?,?,?,?)');
 		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-		    $sth->execute($content{'site'}, $content{'url'}, $nick, $content{'author'}, $content{'title'}, $chan->[0])
+		    $sth->execute($content{'site'}, $content{'url'}, $nick, $content{'author'}, $content{'title'})
 			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 	    }
 
