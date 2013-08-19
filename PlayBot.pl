@@ -164,6 +164,8 @@ sub on_connect
 {
 	my $kernel = $_[ KERNEL ];
 
+    setConf();
+    $irc->yield(privmsg => "NickServ" => "identify ".$conf->{'nickserv_pwd'}) unless ($debug);
 	$log->info('connected');
 
 	foreach (@channels) {
@@ -286,11 +288,6 @@ sub on_speak
         }
     }	
 }
-
-
-setConf();
-
-$irc->yield(privmsg => "NickServ" => "identify ".$conf->{'nickserv_pwd'}) unless ($debug);
 
 # Boucle des events
 $poe_kernel->run();
