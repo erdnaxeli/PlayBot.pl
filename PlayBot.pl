@@ -279,13 +279,8 @@ sub on_speak
         # if not, maybe there is an url we can parse
 	    my $id = sites::parser::parse(@args);
 
-        if ($id) {
-            # if yes, we need to save the new content's id
-	        $lastID{$chan->[0]} = $id;
-
-	        # we insert the potiential tags
-            commands::parser::tag($msg, $chan);
-        }
+        # if there is a new content, there is a new id to save
+        $lastID{$chan->[0]} = $id if ($id);
     }	
 }
 
