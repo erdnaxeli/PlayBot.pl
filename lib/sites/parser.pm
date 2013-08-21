@@ -80,6 +80,9 @@ sub parse {
 			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
 		    $id = $sth->fetch->[0];
+
+            # we don't want to reinsert the context, so we delete it
+            delete $content{'context'};
 	    }
 
 	    # message sur irc
