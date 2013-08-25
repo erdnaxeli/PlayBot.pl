@@ -71,7 +71,7 @@ sub parse {
 	    }
 
 	    # sélection de l'id de la vidéo insérée
-	    $id = $dbh->{mysql_insert_id};
+        $id = $sth->{mysql_insertid};
 	    if (!$id) {
 		    my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
 		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
