@@ -102,9 +102,6 @@ sub parse {
         $sth->execute($id, $chan->[0])
             or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
-	    # we insert the potiential tags
-        commands::parser::tag($msg, $chan);
-
         if (defined $content{'context'}) {
             commands::tag::addContext($id, $content{'context'});
         }
