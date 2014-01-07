@@ -62,8 +62,8 @@ sub exec {
 
         commands::tag::exec($id, $msg);
     }
-    elsif ($msg =~ /^( *!get(?: +.*)?$)/) {
-        $msg = substr $msg, length $1;
+    elsif ($msg =~ /^( *!get)(?: +.*)?$/) {
+        $msg = substr $msg, (length $1) + 1;
         my @args = ($kernel, $user, $chan, $msg);
         my $id = commands::get::exec(@args);
 
