@@ -180,7 +180,7 @@ sub on_connect
 	my $hour = strftime ('%H', localtime);
 	my $min = strftime ('%M', localtime);
 
-	$kernel->delay_set('_flux', (23-$hour)*3600 + (60-$min)*60);
+	#$kernel->delay_set('_flux', (23-$hour)*3600 + (60-$min)*60);
 }
 
 
