@@ -13,12 +13,12 @@ our $irc;
 sub exec {
 	my ($kernel, $user, $chan, $msg) = @_;
 
-    my @tags = ($msg =~ /#?([a-zA-Z0-9_-]+)/g);
-    my $content;
-
     # if we are in a query or arg -all, we search in all the channels
     my $all = 0;
-    $all = 1 if ($chan->[0] !~ /^#/ || $chan->[0] =~ s/-all//);
+    $all = 1 if ($chan->[0] !~ /^#/ || $msg =~ s/-all//);
+
+    my @tags = ($msg =~ /#?([a-zA-Z0-9_-]+)/g);
+    my $content;
 
     if (@tags) {
         my $params = join ', ' => ('?') x @tags;
