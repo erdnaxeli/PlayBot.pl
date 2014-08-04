@@ -6,6 +6,7 @@ our @EXPORT_OK = qw(exec);
 
 use strict;
 use warnings;
+use Scalar::Util qw(looks_like_number);
 
 our $dbh;
 our $irc;
@@ -19,34 +20,42 @@ sub exec {
 
     my @tags = ($msg =~ /#?([a-zA-Z0-9_-]+)/g);
     my $content;
+    my $sth;
 
     if (@tags) {
-        my $params = join ', ' => ('?') x @tags;
-        my $sth;
-
-        if ($all) {
+        if (looks_like_number($tags[0])) {
             $sth = $dbh->prepare('select id, sender, title, url
                 from playbot
-                natural join playbot_tags
-                where tag in ('.$params.')
-                group by id
-                having count(*) >= ?
-                order by rand()
-                limit 1');
-            $sth->execute(@tags, scalar @tags);
+                where id = ?');
+            $sth->execute($tags[0]);
         }
         else {
-            $sth = $dbh->prepare('select p.id, p.sender, p.title, p.url
-                from playbot p
-                natural join playbot_tags pt
-                join playbot_chan pc on p.id = pc.content
-                where pt.tag in ('.$params.')
-                and pc.chan = ?
-                group by p.id
-                having count(*) >= ?
-                order by rand()
-                limit 1');
-            $sth->execute(@tags, $chan->[0], scalar @tags);
+            my $params = join ', ' => ('?') x @tags;
+
+            if ($all) {
+                $sth = $dbh->prepare('select id, sender, title, url
+                    from playbot
+                    natural join playbot_tags
+                    where tag in ('.$params.')
+                    group by id
+                    having count(*) >= ?
+                    order by rand()
+                    limit 1');
+                $sth->execute(@tags, scalar @tags);
+            }
+            else {
+                $sth = $dbh->prepare('select p.id, p.sender, p.title, p.url
+                    from playbot p
+                    natural join playbot_tags pt
+                    join playbot_chan pc on p.id = pc.content
+                    where pt.tag in ('.$params.')
+                    and pc.chan = ?
+                    group by p.id
+                    having count(*) >= ?
+                    order by rand()
+                    limit 1');
+                $sth->execute(@tags, $chan->[0], scalar @tags);
+            }
         }
 
         $content = $sth->fetch;
@@ -57,8 +66,6 @@ sub exec {
         }
     }
     else {
-        my $sth;
-
         if ($all) {
             $sth = $dbh->prepare('select id, sender, title, url from playbot
                 order by rand()
@@ -83,7 +90,7 @@ sub exec {
         }
     }
     
-    my $sth = $dbh->prepare("select group_concat(tag separator ' ')
+    $sth = $dbh->prepare("select group_concat(tag separator ' ')
         from playbot_tags
         where id = ? and context = 0
         group by id");
