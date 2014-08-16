@@ -14,14 +14,15 @@ use commands::get;
 
 my $lastID;
 my $irc;
+my $dbh;
 
 sub setConf {
-    my ($ircNew, $dbh, $log, $lastIDnew) = @_;
+    my ($ircNew, $dbhNew, $log, $lastIDnew) = @_;
 
-    $commands::fav::dbh = $dbh;
-    $commands::tag::dbh = $dbh;
-    $commands::get::dbh = $dbh;
-    $commands::later::dbh = $dbh;
+    $commands::fav::dbh = $dbhNew;
+    $commands::tag::dbh = $dbhNew;
+    $commands::get::dbh = $dbhNew;
+    $commands::later::dbh = $dbhNew;
 
     $commands::fav::log = $log;
     $commands::tag::log = $log;
@@ -31,8 +32,9 @@ sub setConf {
     $commands::fav::irc = $ircNew;
     $commands::get::irc = $ircNew;
 
-    $irc = $ircNew;
     $lastID = $lastIDnew;
+    $irc = $ircNew;
+    $dbh = $dbhNew;
 }
 
 sub exec {
@@ -45,10 +47,23 @@ sub exec {
         commands::fav::exec($nick, $id)
 	}
 	elsif ($msg =~ /^ *!later(?: (-?[0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
-        my $id = ($1) ? $1 : $lastID->{$chan->[0]};
+        my $id = $1;
+        my $offset = $1;
         my ($time, $unit) = ($2, $3);
 
-        commands::later::exec($kernel, $nick, $id, $time, $unit);
+        if ($id eq '' || $id =~ /^-/) {
+            my $sth = $dbh->prepare('
+                SELECT content
+                FROM playbot_chan
+                WHERE chan = ?
+                AND date <= NOW()
+                ORDER BY date DESC
+                LIMIT 1');
+            $sth->execute($chan->[0]);
+            $id = $sth->fetch->[0];
+        }
+
+        commands::later::exec($kernel, $nick, $id, $offset, $chan, $time, $unit);
 	}
     elsif ($msg =~ /^( *!tag)(?:( +)([0-9]+))?/) {
         my $id = $3;

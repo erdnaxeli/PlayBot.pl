@@ -8,32 +8,36 @@ our $dbh;
 our $log;
 
 sub exec {
-    my ($kernel, $nick, $id, $time, $unit) = @_;
+    my ($kernel, $nick, $id, $offset, $chan, $time, $unit) = @_;
+    print ">>@_\n";
 
 	$time = 6 if (!$time);
 	$time *= ($unit eq 's') ? 1 : ($unit eq 'm') ? 60 : 3600;
 
-    if ($id == -1) {
+    if ($offset == -1) {
+        print "lolo\n";
         my $sth = $dbh->prepare_cached('
             SELECT content
             FROM playbot_chan
-            WHERE id < (SELECT id
+            WHERE date < (SELECT date
                         FROM playbot_chan
-                        WHERE content = ?)
+                        WHERE content = ?
+                        AND chan = ?)
             AND chan = (SELECT chan
                         FROM playbot_chan
-                        WHERE content = ?)
-            ORDER BY id DESC
+                        WHERE content = ?
+                        AND chan = ?)
+            ORDER BY date DESC
             LIMIT 1');
 	    unless (defined $sth) {
             $log->error("Couldn't prepare querie; aborting");
             return;
         }	
-        $sth->execute($id, $id)
+        $sth->execute($id, $chan->[0], $id, $chan->[0])
             or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
-        return unless ($content);
         my $content = $sth->fetch;
+        return unless ($content);
         $id = $content->[0];
     }
 
