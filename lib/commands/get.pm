@@ -18,9 +18,21 @@ sub exec {
     my $all = 0;
     $all = 1 if ($chan->[0] !~ /^#/ || $msg =~ s/-all//);
 
-    my @tags = ($msg =~ /#?([a-zA-Z0-9_-]+)/g);
+    my @tags = ($msg =~ /#([a-zA-Z0-9_-]+)/g);
     my $content;
+    my $req;
     my $sth;
+
+    my @words;
+    while ($msg =~ /(^| )([a-zA-Z0-9_-]+)/g) {
+        unshift @words, '%'.$2.'%';
+    }
+
+    my $words_sql;
+    foreach (@words) {
+        $words_sql .= ' and ' if ($words_sql);
+        $words_sql .= "concat(sender, ' ', title) like ?";
+    }
 
     if (@tags) {
         if (looks_like_number($tags[0])) {
@@ -33,28 +45,34 @@ sub exec {
             my $params = join ', ' => ('?') x @tags;
 
             if ($all) {
-                $sth = $dbh->prepare('select id, sender, title, url
+                $req = 'select id, sender, title, url
                     from playbot
                     natural join playbot_tags
-                    where tag in ('.$params.')
-                    group by id
+                    where tag in ('.$params.')';
+                $req .= ' and '.$words_sql if ($words_sql);
+                $req .= ' group by id
                     having count(*) >= ?
                     order by rand()
-                    limit 1');
-                $sth->execute(@tags, scalar @tags);
+                    limit 1';
+
+                $sth = $dbh->prepare($req);
+                $sth->execute(@tags, @words, scalar @tags);
             }
             else {
-                $sth = $dbh->prepare('select p.id, p.sender, p.title, p.url
+                $req = 'select p.id, p.sender, p.title, p.url
                     from playbot p
                     natural join playbot_tags pt
                     join playbot_chan pc on p.id = pc.content
-                    where pt.tag in ('.$params.')
-                    and pc.chan = ?
+                    where pt.tag in ('.$params.')';
+                $req .= ' and '.$words_sql if ($words_sql);
+                $req .= ' and pc.chan = ?
                     group by p.id
                     having count(*) >= ?
                     order by rand()
-                    limit 1');
-                $sth->execute(@tags, $chan->[0], scalar @tags);
+                    limit 1';
+
+                $sth = $dbh->prepare($req);
+                $sth->execute(@tags, @words, $chan->[0], scalar @tags);
             }
         }
 
@@ -67,25 +85,35 @@ sub exec {
     }
     else {
         if ($all) {
-            $sth = $dbh->prepare('select id, sender, title, url from playbot
-                order by rand()
-                limit 1');
-            $sth->execute;
+            $req = 'select id, sender, title, url from playbot';
+            $req .= ' where '.$words_sql if ($words_sql);
+            $req .= ' order by rand() limit 1';
+
+            $sth = $dbh->prepare($req);
+            $sth->execute (@words);
         }
         else {
-            $sth = $dbh->prepare('select p.id, p.sender, p.title, p.url
+            $req = 'select p.id, p.sender, p.title, p.url
                 from playbot p
                 join playbot_chan pc on p.id = pc.content
-                where pc.chan = ?
-                order by rand()
-                limit 1');
-            $sth->execute($chan->[0]);
+                where pc.chan = ?';
+            $req .= ' and '.$words_sql if ($words_sql);
+            $req .= ' order by rand()
+                limit 1';
+
+            $sth = $dbh->prepare($req);
+            $sth->execute($chan->[0], @words);
         }
 
         $content = $sth->fetch;
         
         if (!$content) {
-            $irc->yield(privmsg => $chan => "Poste d'abord du contenu, n00b.");
+            if (@words) {
+                $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
+            }
+            else {
+                $irc->yield(privmsg => $chan => "Poste d'abord du contenu, n00b.");
+            }
             return
         }
     }
