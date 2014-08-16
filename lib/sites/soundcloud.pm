@@ -30,16 +30,6 @@ sub get {
 		$infos{'ddl'} = $content->{'download_url'};
 	}
     
-    my $context = $content->{'tag_list'}.' '.$content->{'description'};
-    $context = $context.' '.$infos{'title'}.' '.$infos{'author'};
-    my $finder = URI::Find->new( sub { '' } );
-
-    # we remove the URI and the punctuation
-    $finder->find(\$context);
-    $context =~ s/[[:punct:]]/ /g;
-
-    $infos{'context'} = $context;
-	
 	return %infos;
 }
 

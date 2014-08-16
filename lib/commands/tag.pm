@@ -4,8 +4,6 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(exec);
 
-use Lingua::StopWords qw(getStopWords);
-
 our $dbh;
 our $log;
 
@@ -17,37 +15,19 @@ sub exec {
     }
 }
 
-sub addContext
-{
-    my ($id, $msg) = @_;
-
-    while ($msg =~ /#?([a-zA-Z0-9_-]+)/g) {
-        addTag($id, $1, 1);
-    }
-}
-
 sub addTag
 {
-    my ($id, $tag, $context) = @_;
+    my ($id, $tag) = @_;
     my $stopwords_en = getStopWords('en');
     my $stopwords_fr = getStopWords('fr');
 
-    return if ($context and ($stopwords_en->{lc $tag} or $stopwords_fr->{lc $tag}));
-
     my $sth;
 
-    if (!$context) {
-        $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag, context)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY
-            UPDATE context = 0');
-    } else {
-        $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag, context)
-            VALUES (?, ?, ?)');
-    }
+    $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag)
+        VALUES (?, ?)');
 	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-	$sth->execute($id, $tag, ($context) ? 1 : 0)
+	$sth->execute($id, $tag)
 		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 }
 

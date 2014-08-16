@@ -80,9 +80,6 @@ sub parse {
 			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
 		    $id = $sth->fetch->[0];
-
-            # we don't want to reinsert the context, so we delete it
-            delete $content{'context'};
 	    }
 
 	    # message sur irc
@@ -101,10 +98,6 @@ sub parse {
 
         $sth->execute($id, $chan->[0])
             or $log->error("Couldn't finish transaction: " . $dbh->errstr);
-
-        if (defined $content{'context'}) {
-            commands::tag::addContext($id, $content{'context'});
-        }
     }
 
     return $id;

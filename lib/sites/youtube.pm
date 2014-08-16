@@ -21,17 +21,6 @@ sub get {
     $infos{'author'} = $video->uploader;
 	$infos{'url'} = $video->base_uri;
 
-=cut
-    my $context = decode("UTF-8", $video->description) . ' ' . $infos{'title'};
-    my $finder = URI::Find->new( sub { '' } );
-
-    # we remove the URI and the punctuation
-    $finder->find(\$context);
-    $context =~ s/[[:punct:]]/ /g;
-
-    $infos{'context'} = $context;
-=cut
-
 	return %infos;
 }
 

@@ -120,7 +120,7 @@ sub exec {
     
     $sth = $dbh->prepare("select group_concat(tag separator ' ')
         from playbot_tags
-        where id = ? and context = 0
+        where id = ?
         group by id");
     $sth->execute($content->[0]);
 
