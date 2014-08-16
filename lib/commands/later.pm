@@ -9,13 +9,11 @@ our $log;
 
 sub exec {
     my ($kernel, $nick, $id, $offset, $chan, $time, $unit) = @_;
-    print ">>@_\n";
 
 	$time = 6 if (!$time);
 	$time *= ($unit eq 's') ? 1 : ($unit eq 'm') ? 60 : 3600;
 
     if ($offset == -1) {
-        print "lolo\n";
         my $sth = $dbh->prepare_cached('
             SELECT content
             FROM playbot_chan
