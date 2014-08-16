@@ -43,7 +43,7 @@ sub exec {
 
         commands::fav::exec($nick, $id)
 	}
-	elsif ($msg =~ /^ *!later(?: ([0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
+	elsif ($msg =~ /^ *!later(?: (-?[0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
         my $id = ($1) ? $1 : $lastID->{$chan->[0]};
         my ($time, $unit) = ($2, $3);
 
