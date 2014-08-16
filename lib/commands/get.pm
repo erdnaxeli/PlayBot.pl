@@ -10,9 +10,10 @@ use Scalar::Util qw(looks_like_number);
 
 our $dbh;
 our $irc;
+our $log;
 
 sub exec {
-	my ($kernel, $user, $chan, $msg) = @_;
+	my ($kernel, $nick, $chan, $msg) = @_;
 
     # if we are in a query or arg -all, we search in all the channels
     my $all = 0;
@@ -140,6 +141,15 @@ sub exec {
     else {
     	$irc->yield(privmsg => $chan => '['.$content->[0].'] '.$content->[2].' => '.$content->[3].' '.$tags) ;
     }
+
+    # we save the get like a post
+    my $sth2 = $dbh->prepare_cached('
+        INSERT INTO playbot_chan (content, chan, sender_irc)
+        VALUES (?,?,?)');
+    $log->error("Couldn't prepare querie; aborting") unless (defined $sth2);
+
+    $sth2->execute($content->[0], $chan->[0], $nick)
+        or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
     return $content->[0];
 }

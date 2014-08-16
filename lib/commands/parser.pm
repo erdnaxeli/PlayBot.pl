@@ -25,6 +25,7 @@ sub setConf {
 
     $commands::fav::log = $log;
     $commands::tag::log = $log;
+    $commands::get::log = $log;
     $commands::later::log = $log;
 
     $commands::fav::irc = $ircNew;
@@ -64,7 +65,7 @@ sub exec {
     }
     elsif ($msg =~ /^( *!get)(?: +.*)?$/) {
         $msg = substr $msg, (length $1) + 1;
-        my @args = ($kernel, $user, $chan, $msg);
+        my @args = ($kernel, $nick, $chan, $msg);
         my $id = commands::get::exec(@args);
 
         if ($id) {
