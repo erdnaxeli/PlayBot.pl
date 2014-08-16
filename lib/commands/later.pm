@@ -13,18 +13,22 @@ sub exec {
 	$time = 6 if (!$time);
 	$time *= ($unit eq 's') ? 1 : ($unit eq 'm') ? 60 : 3600;
 
-    while ($offset <= 0) {
+    while ($offset < 0) {
         my $sth = $dbh->prepare_cached('
             SELECT content
             FROM playbot_chan
             WHERE date < (SELECT date
                         FROM playbot_chan
                         WHERE content = ?
-                        AND chan = ?)
+                        AND chan = ?
+                        ORDER BY date DESC
+                        LIMIT 1)
             AND chan = (SELECT chan
                         FROM playbot_chan
                         WHERE content = ?
-                        AND chan = ?)
+                        AND chan = ?
+                        ORDER BY date DESC
+                        LIMIT 1)
             ORDER BY date DESC
             LIMIT 1');
 	    unless (defined $sth) {

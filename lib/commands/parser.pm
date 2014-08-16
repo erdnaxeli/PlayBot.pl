@@ -48,7 +48,7 @@ sub exec {
 	}
 	elsif ($msg =~ /^ *!later(?: (-?[0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
         my $id = $1;
-        my $offset = $1;
+        my $offset = ($1) ? $1 : 0;
         my ($time, $unit) = ($2, $3);
 
         if ($id eq '' || $id =~ /^-/) {
