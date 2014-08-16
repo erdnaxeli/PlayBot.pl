@@ -119,6 +119,14 @@ sub later
 		$irc->yield(privmsg => $nick => '['.$id.'] '.$donnees[2].' | '.$donnees[1]);
 		$irc->yield(privmsg => $nick => $donnees[0]);
     
+        # save the content in the history
+        my $sth2 = $dbh->prepare_cached('
+            INSERT INTO playbot_chan (content, chan, sender_irc)
+            VALUES (?,?,?)');
+        $log->error("Couldn't prepare querie; aborting") unless (defined $sth2);
+        $sth2->execute($id, $nick, $nick)
+            or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
 	    $lastID{$nick} = $id;
 	}
 }
