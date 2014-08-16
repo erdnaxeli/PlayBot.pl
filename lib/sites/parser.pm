@@ -62,11 +62,11 @@ sub parse {
 	    else {
 		    # insertion de la vidéo dans la bdd
 		    my $sth = $dbh->prepare_cached('
-                INSERT INTO playbot (date, type, url, sender_irc, sender, title)
-                VALUES (NOW(),?,?,?,?,?)');
+                INSERT INTO playbot (type, url, sender, title)
+                VALUES (?,?,?,?)');
 		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-		    $sth->execute($content{'site'}, $content{'url'}, $nick, $content{'author'}, $content{'title'})
+		    $sth->execute($content{'site'}, $content{'url'}, $content{'author'}, $content{'title'})
 			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 	    }
 
@@ -92,11 +92,11 @@ sub parse {
 
         # insertion du chan
         my $sth = $dbh->prepare_cached('
-            INSERT INTO playbot_chan (content, chan)
-            VALUES (?,?)');
+            INSERT INTO playbot_chan (content, chan, sender_irc)
+            VALUES (?,?,?)');
 		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-        $sth->execute($id, $chan->[0])
+        $sth->execute($id, $chan->[0], $nick)
             or $log->error("Couldn't finish transaction: " . $dbh->errstr);
     }
 
