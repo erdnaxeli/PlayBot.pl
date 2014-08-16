@@ -91,9 +91,14 @@ sub exec {
 		$irc->yield(privmsg => $nick => '!fav [<id>] : enregistre la vidéo dans les favoris');
 		$irc->yield(privmsg => $nick => '!tag [<id>] <tag1> <tag2> ... : tag la vidéo');
 		$irc->yield(privmsg => $nick => '!later [<id>] [in <x>[s|m|h]] : vidéo rappelée par query (par défaut temps de 6h)');
-		$irc->yield(privmsg => $nick => '!get [<tags>] : sort aléatoirement une vidéo');
-		$irc->yield(privmsg => $nick => "Sans id précisée, la dernière vidéo postée sur le chan est utilisée (ça marche aussi avec !get).");
-		$irc->yield(privmsg => $nick => "Un tag est de la forme « #[a-zA-Z0-9_-]+ ». Par exemple « #loLILol-mdr_lol42 » est un tag valide, tandis que « #céducaca » n'en ai pas un (seul « #c » sera considéré).");
+		$irc->yield(privmsg => $nick => "    Sans id précisée, la dernière vidéo postée sur le chan est utilisée.");
+		$irc->yield(privmsg => $nick => '    L\'id peut être négatif, auquel cas -1 correspond à l\'avant dernière vidéo.');
+		$irc->yield(privmsg => $nick => '!get [<id>|<query>] : sort aléatoirement une vidéo');
+		$irc->yield(privmsg => $nick => '    Si un id est précisé, sort ce contenu (s\'il existe).');
+		$irc->yield(privmsg => $nick => '    <query> : composée de tags commençant par un \'#\' ou de mots. Les mots sont recherché dans le titre ainsi que le nom de l\'auteur du contenu.');
+		$irc->yield(privmsg => $nick => "Un tag est de la forme « #[a-zA-Z0-9_]+ ». Par exemple « #loLILol_mdr42 » est un tag valide, tandis que « #céducaca » et « #je-suis-nul » n'en sont pas et seront considéré respectivement comme « #c » et « #je ».");
+        $irc->yield(privmsg => $nick => "Toutes les commandes fonctionnent en query.");
+        $irc->yield(privmsg => $nick => 'Niveau vie privée, potentiellement toute commande (excepté !help) entraine un enregistrement dans la base de données avec au minimum la date et l\'heure et le nick de la personne ayant exécuté la commande.');
     }
     else {
         return 0;
