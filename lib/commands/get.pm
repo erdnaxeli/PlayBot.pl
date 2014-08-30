@@ -35,46 +35,51 @@ sub exec {
         $words_sql .= "concat(sender, ' ', title) like ?";
     }
 
-    if (@tags) {
-        if (looks_like_number($tags[0])) {
-            $sth = $dbh->prepare('select id, sender, title, url
+    if (@words && looks_like_number($words[0])) {
+        $sth = $dbh->prepare('select id, sender, title, url
+            from playbot
+            where id = ?');
+        $sth->execute($tags[0]);
+
+        $content = $sth->fetch;
+
+        if (!$content) {
+            $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
+            return
+        }
+    }
+    elsif (@tags) {
+        my $params = join ', ' => ('?') x @tags;
+
+        if ($all) {
+            $req = 'select id, sender, title, url
                 from playbot
-                where id = ?');
-            $sth->execute($tags[0]);
+                natural join playbot_tags
+                where tag in ('.$params.')';
+            $req .= ' and '.$words_sql if ($words_sql);
+            $req .= ' group by id
+                having count(*) >= ?
+                order by rand()
+                limit 1';
+
+            $sth = $dbh->prepare($req);
+            $sth->execute(@tags, @words, scalar @tags);
         }
         else {
-            my $params = join ', ' => ('?') x @tags;
+            $req = 'select p.id, p.sender, p.title, p.url
+                from playbot p
+                natural join playbot_tags pt
+                join playbot_chan pc on p.id = pc.content
+                where pt.tag in ('.$params.')';
+            $req .= ' and '.$words_sql if ($words_sql);
+            $req .= ' and pc.chan = ?
+                group by p.id
+                having count(*) >= ?
+                order by rand()
+                limit 1';
 
-            if ($all) {
-                $req = 'select id, sender, title, url
-                    from playbot
-                    natural join playbot_tags
-                    where tag in ('.$params.')';
-                $req .= ' and '.$words_sql if ($words_sql);
-                $req .= ' group by id
-                    having count(*) >= ?
-                    order by rand()
-                    limit 1';
-
-                $sth = $dbh->prepare($req);
-                $sth->execute(@tags, @words, scalar @tags);
-            }
-            else {
-                $req = 'select p.id, p.sender, p.title, p.url
-                    from playbot p
-                    natural join playbot_tags pt
-                    join playbot_chan pc on p.id = pc.content
-                    where pt.tag in ('.$params.')';
-                $req .= ' and '.$words_sql if ($words_sql);
-                $req .= ' and pc.chan = ?
-                    group by p.id
-                    having count(*) >= ?
-                    order by rand()
-                    limit 1';
-
-                $sth = $dbh->prepare($req);
-                $sth->execute(@tags, @words, $chan->[0], scalar @tags);
-            }
+            $sth = $dbh->prepare($req);
+            $sth->execute(@tags, @words, $chan->[0], scalar @tags);
         }
 
         $content = $sth->fetch;
