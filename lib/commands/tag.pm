@@ -18,8 +18,6 @@ sub exec {
 sub addTag
 {
     my ($id, $tag) = @_;
-    my $stopwords_en = getStopWords('en');
-    my $stopwords_fr = getStopWords('fr');
 
     my $sth;
 
