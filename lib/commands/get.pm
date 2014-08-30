@@ -24,9 +24,10 @@ sub exec {
     my $req;
     my $sth;
 
-    my @words;
-    while ($msg =~ /(^| )([a-zA-Z0-9_-]+)/g) {
-        unshift @words, '%'.$2.'%';
+    my @words = ($msg =~ /([a-zA-Z0-9_-]+)/g);
+    my @words_param;
+    while ($msg =~ /([a-zA-Z0-9_-]+)/g) {
+        unshift @words_param, '%'.$1.'%';
     }
 
     my $words_sql;
@@ -39,7 +40,7 @@ sub exec {
         $sth = $dbh->prepare('select id, sender, title, url
             from playbot
             where id = ?');
-        $sth->execute($tags[0]);
+        $sth->execute($words[0]);
 
         $content = $sth->fetch;
 
@@ -63,7 +64,7 @@ sub exec {
                 limit 1';
 
             $sth = $dbh->prepare($req);
-            $sth->execute(@tags, @words, scalar @tags);
+            $sth->execute(@tags, @words_param, scalar @tags);
         }
         else {
             $req = 'select p.id, p.sender, p.title, p.url
@@ -79,7 +80,7 @@ sub exec {
                 limit 1';
 
             $sth = $dbh->prepare($req);
-            $sth->execute(@tags, @words, $chan->[0], scalar @tags);
+            $sth->execute(@tags, @words_param, $chan->[0], scalar @tags);
         }
 
         $content = $sth->fetch;
@@ -96,7 +97,7 @@ sub exec {
             $req .= ' order by rand() limit 1';
 
             $sth = $dbh->prepare($req);
-            $sth->execute (@words);
+            $sth->execute (@words_param);
         }
         else {
             $req = 'select p.id, p.sender, p.title, p.url
@@ -108,7 +109,7 @@ sub exec {
                 limit 1';
 
             $sth = $dbh->prepare($req);
-            $sth->execute($chan->[0], @words);
+            $sth->execute($chan->[0], @words_param);
         }
 
         $content = $sth->fetch;
