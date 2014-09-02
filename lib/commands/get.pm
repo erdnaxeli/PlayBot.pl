@@ -24,7 +24,7 @@ sub exec {
     my $req;
     my $sth;
 
-    my @words = ($msg =~ /([a-zA-Z0-9_-]+)/g);
+    my @words = ($msg =~ /(?:^| )([a-zA-Z0-9_-]+)/g);
     my @words_param;
     while ($msg =~ /([a-zA-Z0-9_-]+)/g) {
         unshift @words_param, '%'.$1.'%';
