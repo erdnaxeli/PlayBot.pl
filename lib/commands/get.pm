@@ -154,7 +154,7 @@ sub exec {
         VALUES (?,?,?)');
     $log->error("Couldn't prepare querie; aborting") unless (defined $sth2);
 
-    $sth2->execute($content->[0], $chan->[0], $nick)
+    $sth2->execute($content->[0], $chan->[0], "PlayBot")
         or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
     return $content->[0];
