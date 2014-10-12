@@ -24,6 +24,7 @@ sub get {
 	$content = decode_json($response->decoded_content);
 	$infos{'title'} = $content->{'title'};
 	$infos{'author'} = $content->{'user'}->{'username'};
+    $infos{'duration'} = $content->{'duration'};
 	$infos{'url'} = $url;
 
 	if ($content->{'downloadable'}) {
