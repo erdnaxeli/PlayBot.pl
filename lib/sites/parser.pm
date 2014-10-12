@@ -90,13 +90,13 @@ sub parse {
         if (defined $content{'duration'}) {
             my $h = int($content{'duration'} / 3600);
             my $m = int(($content{'duration'} % 3600) / 60);
-            my $s = int(($content{'duration'} % 3600) % 3600);
+            my $s = int(($content{'duration'} % 3600) % 60);
 
-            $msg .= ' ( ';
+            $msg .= ' (';
             $msg .= sprintf("%02d:", $h) if ($h > 0);
             $msg .= sprintf("%02d:", $m);
             $msg .= sprintf("%02d", $s);
-            $msg .= ' )';
+            $msg .= ')';
         }
 
 		$irc->yield(privmsg => $chan => $msg);
