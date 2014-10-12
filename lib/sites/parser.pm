@@ -37,11 +37,11 @@ sub parse {
 		eval { %content = soundcloud::get($url) };
 		$content{'site'} = 'soundcloud';
 	}
-#	elsif ($msg =~ m#(^|[^!])https?://www.mixcloud.com/([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+)#) {
-#		my $url = 'https://www.mixcloud.com/'.$2;
-#		eval { %content = mixcloud::get($url) };
-#		$content{'site'} = 'mixcloud';
-#	}
+	elsif ($msg =~ m#(^|[^!])https?://www.mixcloud.com/([a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+)#) {
+		my $url = 'https://www.mixcloud.com/'.$2;
+		eval { %content = mixcloud::get($url) };
+		$content{'site'} = 'mixcloud';
+	}
 	elsif ($msg =~ m#((^|[^!])http://www[0-9]+.zippyshare.com/v/[0-9]+/file.html)#) {
 		my $url = $1;
 		eval { %content = zippy::get($url) };

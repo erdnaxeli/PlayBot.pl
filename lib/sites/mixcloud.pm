@@ -1,71 +1,29 @@
 package mixcloud;
 
 use LWP::UserAgent;
-use HTML::Parser;
-use HTML::Entities;
+use JSON;
 
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mixcloud);
 
 
-my $inTitle = 0;
-my $inAuthor = 0;
-my %infos;
-
-
 sub get {
 	my ($url) = @_;
+    $url =~ s/www/api/;
+    my %infos;
 
-	my $ua = LWP::UserAgent->new(
-		agent   => "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13 GTB7.1",
-		timeout => 30
-	);
-
+	my $ua = LWP::UserAgent->new(timeout => 30);
 	my $response = $ua->get($url);
 	die($response->status_line) unless ($response->is_success);
 
-	my $content = $response->decoded_content;
+	$content = decode_json($response->decoded_content);
+	$infos{'title'} = $content->{'name'};
+	$infos{'author'} = $content->{'user'}->{'name'};
+	$infos{'url'} = $content->{'url'};
+    $infos{'duration'} = $content->{'audio_length'};
 
-	my $parser = HTML::Parser->new();
-	$parser->handler(text => \&parser_text, 'text');
-	$parser->handler(start => \&parser_start, 'tagname');
-	$parser->handler(end => \&parser_end, 'tagname');
-	$parser->unbroken_text(1);
-	$parser->report_tags('title', 'a');
-	$parser->parse($content);
-	$parser->eof();
-	
-	$infos{'url'} = $url;
-	
 	return %infos;
-}
-
-sub parser_text
-{
-	my ($text) = @_;
-	chomp $text;
-	$text = decode_entities($text);
-
-	if ($inTitle) {
-		$text =~ s/\n//;
-		$text =~ s/ \| Mixcloud .*//;
-		$text =~ s/^ *//;
-		$text =~ s/[^a-zA-Z0-9\(\)\[\]]*$//;
-		($infos{'author'}, $infos{'title'}) = split (' - ', $text, 2);
-	}
-}
-
-sub parser_start
-{
-	my ($tag) = @_;
-	$inTitle = 1 if ($tag eq 'title');
-}
-
-sub parser_end
-{
-	my ($tag) = @_;
-	$inTitle = 0 if ($tag eq 'title');
 }
 
 1;
