@@ -20,6 +20,7 @@ sub get {
     $infos{'title'} = $video->title;
     $infos{'author'} = $video->uploader;
 	$infos{'url'} = $video->base_uri;
+    $infos{'duration'} = $video->duration;
 
 	return %infos;
 }
