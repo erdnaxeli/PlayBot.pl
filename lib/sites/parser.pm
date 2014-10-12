@@ -83,12 +83,23 @@ sub parse {
 	    }
 
 	    # message sur irc
+        my $msg = '['.$id.'] '.$content{'title'};
 	    if (defined $content{'author'}) {
-		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}.' | '.$content{'author'}) ;
+		    $msg .= ' | '.$content{'author'};
 	    }
-	    else {
-		    $irc->yield(privmsg => $chan => '['.$id.'] '.$content{'title'}) ;
-	    }
+        if (defined $content{'duration'}) {
+            my $h = int($content{'duration'} / 3600);
+            my $m = int(($content{'duration'} % 3600) / 60);
+            my $s = int(($content{'duration'} % 3600) % 3600);
+
+            $msg .= ' ( ';
+            $msg .= sprintf("%02d:", $h) if ($h > 0);
+            $msg .= sprintf("%02d:", $m);
+            $msg .= sprintf("%02d", $s);
+            $msg .= ' )';
+        }
+
+		$irc->yield(privmsg => $chan => $msg);
 
         # insertion du chan
         my $sth = $dbh->prepare_cached('
