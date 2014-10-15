@@ -27,7 +27,7 @@ my $nick = 'PlayBot';
 my $port = 6667;
 my $ircname = 'nightiies';
 my $username = 'nightiies';
-my @channels = qw(#nightiies #dansiie #pimpim #vitamine #fanfare #groop #bigphatsubwoofer);
+my @channels = qw(#nightiies #dansiie #pimpim #vitamine #fanfare #groop #bigphatsubwoofer #muzzik #leagueoflegends #toof);
 my $admin = 'moise';
 my $baseurl = 'http://nightiies.iiens.net/links/';
 my @nicksToVerify;
