@@ -14,6 +14,8 @@ my $lastID;
 my $irc;
 my $dbh;
 
+my @insultes = ("Ahahahah ! 23 à 0 !", "C'est la piquette, Jack !", "Tu sais pas jouer, Jack !", "T'es mauvais, Jack !");
+
 sub setConf {
     my ($ircNew, $dbhNew, $log, $lastIDnew) = @_;
 
@@ -65,18 +67,24 @@ sub exec {
 
         commands::later::exec($kernel, $nick, $id, $offset, $chan, $time, $unit);
 	}
-    elsif ($msg =~ /^( *!tag)(?:( +)([0-9]+))?/) {
-        my $id = $3;
+    elsif ($msg =~ /^( *!tag)(?:( +)(-?[0-9]+))?/) {
+        my $index = $3;
+        my $id;
 
-        if ($id) {
-            $msg = substr $msg, (length $1) + (length $2) + (length $id);
+        if ($3) {
+            $msg = substr $msg, (length $1) + (length $2) + (length $3);
         }
         else {
-            $id = $lastID->{$chan->[0]};
             $msg = substr $msg, (length $1) + (length $2);
         }
 
-        commands::tag::exec($id, $msg);
+        try {
+            $id = utils::id::get($chan->[0], $index);
+            commands::tag::exec($id, $msg);
+        } catch {
+            $irc->yield(privmsg => $chan->[0] => $insultes[rand @insultes]);
+            return 1;
+        };
     }
     elsif ($msg =~ /^( *!get)(?: +.*)?$/) {
         $msg = substr $msg, (length $1) + 1;
