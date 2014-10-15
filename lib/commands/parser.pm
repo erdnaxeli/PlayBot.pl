@@ -49,23 +49,16 @@ sub exec {
         commands::fav::exec($nick, $id)
 	}
 	elsif ($msg =~ /^ *!later(?: (-?[0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
-        my $id = $1;
+        my $index = $1;
         my $offset = ($1) ? $1 : 0;
         my ($time, $unit) = ($2, $3);
 
-        if ($id eq '' || $id =~ /^-/) {
-            my $sth = $dbh->prepare('
-                SELECT content
-                FROM playbot_chan
-                WHERE chan = ?
-                AND date <= NOW()
-                ORDER BY date DESC
-                LIMIT 1');
-            $sth->execute($chan->[0]);
-            $id = $sth->fetch->[0];
-        }
-
-        commands::later::exec($kernel, $nick, $id, $offset, $chan, $time, $unit);
+        try {
+            my $id = utils::id::get($chan->[0], $index);
+            commands::later::exec($kernel, $nick, $id, $chan, $time, $unit);
+        } catch {
+            $irc->yield(privmsg => $chan->[0] => $insultes[rand @insultes]);
+        };
 	}
     elsif ($msg =~ /^( *!tag)(?:( +)(-?[0-9]+))?/) {
         my $index = $3;
@@ -83,7 +76,6 @@ sub exec {
             commands::tag::exec($id, $msg);
         } catch {
             $irc->yield(privmsg => $chan->[0] => $insultes[rand @insultes]);
-            return 1;
         };
     }
     elsif ($msg =~ /^( *!get)(?: +.*)?$/) {
