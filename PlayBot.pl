@@ -12,7 +12,7 @@ use Module::Reload;
 use FindBin;
 
 use lib "$FindBin::Bin/lib/";
-use Logging;
+use utils::Logging;
 use sites::parser;
 use commands::parser;
 
