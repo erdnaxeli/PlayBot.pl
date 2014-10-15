@@ -3,11 +3,6 @@ package mixcloud;
 use LWP::UserAgent;
 use JSON;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(mixcloud);
-
-
 sub get {
 	my ($url) = @_;
     $url =~ s/www/api/;

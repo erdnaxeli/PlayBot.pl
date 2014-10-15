@@ -4,11 +4,6 @@ use LWP::UserAgent;
 use HTML::Parser;
 use HTML::Entities;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(zippy);
-
-
 my $inTitle = 0;
 my $inAuthor = 0;
 my %infos;

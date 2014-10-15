@@ -4,11 +4,6 @@ use LWP::UserAgent;
 use JSON;
 use URI::Find;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(soundcloud);
-
-
 my $root = 'http://api.soundcloud.com';
 my $clientId = 'f4956716fe1a9dc9c3725af822963365';
 

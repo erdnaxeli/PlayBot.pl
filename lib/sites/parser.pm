@@ -1,9 +1,5 @@
 package sites::parser;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(parse);
-
 use lib "$FindBin::Bin/lib/sites/";
 use youtube;
 use soundcloud;

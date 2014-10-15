@@ -1,9 +1,5 @@
 package commands::later;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(exec);
-
 our $dbh;
 our $log;
 

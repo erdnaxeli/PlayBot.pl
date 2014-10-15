@@ -5,10 +5,6 @@ use URI::Find;
 use Encode;
 require Encode::Detect;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(youtube);
-
 sub get {
 	my $id = shift;
 

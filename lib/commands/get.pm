@@ -1,9 +1,5 @@
 package commands::get;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(exec);
-
 use strict;
 use warnings;
 use Scalar::Util qw(looks_like_number);

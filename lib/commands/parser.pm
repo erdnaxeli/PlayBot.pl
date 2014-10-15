@@ -1,9 +1,5 @@
 package commands::parser;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(exec);
-
 use strict;
 
 use lib "$FindBin::Bin/lib/";
