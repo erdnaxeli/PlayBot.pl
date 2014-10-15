@@ -1,12 +1,14 @@
 package commands::parser;
 
 use strict;
+use Try::Tiny;
 
 use lib "$FindBin::Bin/lib/";
 use commands::fav;
 use commands::later;
 use commands::tag;
 use commands::get;
+use utils::id;
 
 my $lastID;
 my $irc;
@@ -19,11 +21,13 @@ sub setConf {
     $commands::tag::dbh = $dbhNew;
     $commands::get::dbh = $dbhNew;
     $commands::later::dbh = $dbhNew;
+    $utils::id::dbh = $dbhNew;
 
     $commands::fav::log = $log;
     $commands::tag::log = $log;
     $commands::get::log = $log;
     $commands::later::log = $log;
+    $utils::id::log = $log;
 
     $commands::fav::irc = $ircNew;
     $commands::get::irc = $ircNew;
