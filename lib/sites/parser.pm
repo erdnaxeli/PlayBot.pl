@@ -9,6 +9,7 @@ use zippy;
 use lib "$FindBin::Bin/lib/";
 use commands::parser;
 use commands::tag;
+use utils::print;
 
 our $irc;
 our $dbh;
@@ -79,23 +80,8 @@ sub parse {
 	    }
 
 	    # message sur irc
-        my $msg = '['.$id.'] '.$content{'title'};
-	    if (defined $content{'author'}) {
-		    $msg .= ' | '.$content{'author'};
-	    }
-        if (defined $content{'duration'}) {
-            my $h = int($content{'duration'} / 3600);
-            my $m = int(($content{'duration'} % 3600) / 60);
-            my $s = int(($content{'duration'} % 3600) % 60);
-
-            $msg .= ' (';
-            $msg .= sprintf("%02d:", $h) if ($h > 0);
-            $msg .= sprintf("%02d:", $m);
-            $msg .= sprintf("%02d", $s);
-            $msg .= ')';
-        }
-
-		$irc->yield(privmsg => $chan => $msg);
+        $content{'id'} = $id,
+		$irc->yield(privmsg => $chan => utils::print::print(\%content));
 
         # insertion du chan
         my $sth = $dbh->prepare_cached('
