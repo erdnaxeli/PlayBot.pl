@@ -103,7 +103,7 @@ sub exec {
         $irc->yield(privmsg => $nick => "Toutes les commandes fonctionnent en query.");
         $irc->yield(privmsg => $nick => 'Niveau vie privée, potentiellement toute commande (excepté !help) entraine un enregistrement dans la base de données avec au minimum la date et l\'heure et le nick de la personne ayant exécuté la commande.');
     }
-    elsif ($msg =~/^ *!(fav|lat|tag|get)/) {
+    elsif ($msg =~/^ *!(fav|lat|tag)/) {
         $irc->yield(privmsg => $chan->[0] => $insultes[rand @insultes]);
     }
     else {
