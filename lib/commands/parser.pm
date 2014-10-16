@@ -43,7 +43,7 @@ sub exec {
 	my ($kernel, $user, $chan, $msg) = @_;
 	my ($nick, $mask) = split(/!/,$user);
 
-    if ($msg =~ /^ *!fav(?: (\S+))?/) {
+    if ($msg =~ /^ *!fav(?: (\S+))? *$/) {
         my $index = $1;
         try {
             my $id = utils::id::get($chan->[0], $index);
@@ -52,7 +52,7 @@ sub exec {
             $irc->yield(privmsg => $chan->[0] => $insultes[rand @insultes]);
         }
 	}
-	elsif ($msg =~ /^ *!later(?: (-?[0-9]+))?(?: in ([0-9]*)?(h|m|s)?)?/) {
+	elsif ($msg =~ /^ *!later(?: (\S+))?(?: in (\d)+(h|m|s)?)? *$/) {
         my $index = $1;
         my ($time, $unit) = ($2, $3);
 
@@ -63,7 +63,7 @@ sub exec {
             $irc->yield(privmsg => $chan->[0] => $insultes[rand @insultes]);
         };
 	}
-    elsif ($msg =~ /^( *!tag)(?:( +)(-?[0-9]+))?/) {
+    elsif ($msg =~ /^( *!tag)(?:( +)(-?\d+))?/) {
         my $index = $3;
         my $id;
 
