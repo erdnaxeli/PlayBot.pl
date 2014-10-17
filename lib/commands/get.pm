@@ -4,6 +4,9 @@ use strict;
 use warnings;
 use Scalar::Util qw(looks_like_number);
 
+use lib "$FindBin::Bin/lib/";
+use utils::print;
+
 our $dbh;
 our $irc;
 our $log;
@@ -121,28 +124,27 @@ sub exec {
         }
     }
     
-    $sth = $dbh->prepare("select group_concat(tag separator ' ')
+    $sth = $dbh->prepare("select tag
         from playbot_tags
         where id = ?
-        group by id");
+    ");
     $sth->execute($content->[0]);
 
-    my $tags = $sth->fetch;
-
-    if ($tags) {
-        $tags = $tags->[0];
-        $tags =~ s/([a-zA-Z0-9_-]+)/#$1/g;
-    }
-    else {
-        $tags = "";
+    my @tags;
+    while (my $data = $sth->fetch) {
+        my $tag = $data->[0];
+        $tag =~ s/([a-zA-Z0-9_-]+)/#$1/;
+        push @tags, $tag;
     }
 
-    if ($content->[1]) {
-    	$irc->yield(privmsg => $chan => '['.$content->[0].'] '.$content->[2].' | '.$content->[1].' => '.$content->[3].' '.$tags) ;
-    }
-    else {
-    	$irc->yield(privmsg => $chan => '['.$content->[0].'] '.$content->[2].' => '.$content->[3].' '.$tags) ;
-    }
+    my %content_h;
+    $content_h{'id'} = $content->[0];
+    $content_h{'author'} = $content->[1];
+    $content_h{'title'} = $content->[2];
+    $content_h{'url'} = $content->[3];
+    $content_h{'tags'} = \@tags;
+
+    $irc->yield(privmsg => $chan => utils::print::print(\%content_h));
 
     # we save the get like a post
     my $sth2 = $dbh->prepare_cached('
