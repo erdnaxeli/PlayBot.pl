@@ -79,10 +79,6 @@ sub parse {
 		    $id = $sth->fetch->[0];
 	    }
 
-	    # message sur irc
-        $content{'id'} = $id,
-		$irc->yield(privmsg => $chan => utils::print::print(\%content));
-
         # insertion du chan
         my $sth = $dbh->prepare_cached('
             INSERT INTO playbot_chan (content, chan, sender_irc)
@@ -91,6 +87,11 @@ sub parse {
 
         $sth->execute($id, $chan->[0], $nick)
             or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+        # message sur irc
+        $content{'id'} = $id;
+        delete $content{'url'};
+		$irc->yield(privmsg => $chan => utils::print::print(\%content));
     }
 
     return $id;
