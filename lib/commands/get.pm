@@ -36,7 +36,7 @@ sub exec {
     }
 
     if (@words && looks_like_number($words[0])) {
-        $sth = $dbh->prepare('select id, sender, title, url
+        $sth = $dbh->prepare('select id, sender, title, url, duration
             from playbot
             where id = ?');
         $sth->execute($words[0]);
@@ -52,7 +52,7 @@ sub exec {
         my $params = join ', ' => ('?') x @tags;
 
         if ($all) {
-            $req = 'select id, sender, title, url
+            $req = 'select id, sender, title, url, duration
                 from playbot
                 natural join playbot_tags
                 where tag in ('.$params.')';
@@ -66,7 +66,7 @@ sub exec {
             $sth->execute(@tags, @words_param, scalar @tags);
         }
         else {
-            $req = 'select p.id, p.sender, p.title, p.url
+            $req = 'select p.id, p.sender, p.title, p.url, duration
                 from playbot p
                 natural join playbot_tags pt
                 join playbot_chan pc on p.id = pc.content
@@ -91,7 +91,7 @@ sub exec {
     }
     else {
         if ($all) {
-            $req = 'select id, sender, title, url from playbot';
+            $req = 'select id, sender, title, url, duration from playbot';
             $req .= ' where '.$words_sql if ($words_sql);
             $req .= ' order by rand() limit 1';
 
@@ -99,7 +99,7 @@ sub exec {
             $sth->execute (@words_param);
         }
         else {
-            $req = 'select p.id, p.sender, p.title, p.url
+            $req = 'select p.id, p.sender, p.title, p.url, duration
                 from playbot p
                 join playbot_chan pc on p.id = pc.content
                 where pc.chan = ?';
@@ -142,6 +142,7 @@ sub exec {
     $content_h{'author'} = $content->[1];
     $content_h{'title'} = $content->[2];
     $content_h{'url'} = $content->[3];
+    $content_h{'duration'} = $content->[4];
     $content_h{'tags'} = \@tags;
 
     $irc->yield(privmsg => $chan => utils::print::print(\%content_h));
