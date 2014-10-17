@@ -65,9 +65,11 @@ sub parse {
 			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 	    }
 
+        my @tags;
 	    # sélection de l'id de la vidéo insérée
         $id = $sth->{mysql_insertid};
 	    if (!$id) {
+            # la vido avait déjà été insérée
 		    my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
 		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
@@ -75,6 +77,19 @@ sub parse {
 			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
 		    $id = $sth->fetch->[0];
+
+            # get tags
+            $sth = $dbh->prepare("select tag
+                from playbot_tags
+                where id = ?
+            ");
+            $sth->execute($id);
+
+            while (my $data = $sth->fetch) {
+                my $tag = $data->[0];
+                $tag =~ s/([a-zA-Z0-9_-]+)/#$1/;
+                push @tags, $tag;
+            }
 	    }
 
         # insertion du chan
@@ -88,6 +103,7 @@ sub parse {
 
         # message sur irc
         $content{'id'} = $id;
+        $content{'tags'} = \@tags;
         delete $content{'url'};
 		$irc->yield(privmsg => $chan => utils::print::print(\%content));
     }
