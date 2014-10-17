@@ -7,8 +7,6 @@ use mixcloud;
 use zippy;
 
 use lib "$FindBin::Bin/lib/";
-use commands::parser;
-use commands::tag;
 use utils::print;
 
 our $irc;
