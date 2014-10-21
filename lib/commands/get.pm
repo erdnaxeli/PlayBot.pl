@@ -22,6 +22,7 @@ sub exec {
     my $content;
     my $req;
     my $sth;
+    my $rows;
 
     my @words = ($msg =~ /(?:^| )([a-zA-Z0-9_-]+)/g);
     my @words_param;
@@ -59,8 +60,7 @@ sub exec {
             $req .= ' and '.$words_sql if ($words_sql);
             $req .= ' group by id
                 having count(*) >= ?
-                order by rand()
-                limit 1';
+                order by rand()';
 
             $sth = $dbh->prepare($req);
             $sth->execute(@tags, @words_param, scalar @tags);
@@ -75,8 +75,7 @@ sub exec {
             $req .= ' and pc.chan = ?
                 group by p.id
                 having count(*) >= ?
-                order by rand()
-                limit 1';
+                order by rand()';
 
             $sth = $dbh->prepare($req);
             $sth->execute(@tags, @words_param, $chan->[0], scalar @tags);
@@ -93,7 +92,7 @@ sub exec {
         if ($all) {
             $req = 'select id, sender, title, url, duration from playbot';
             $req .= ' where '.$words_sql if ($words_sql);
-            $req .= ' order by rand() limit 1';
+            $req .= ' order by rand()';
 
             $sth = $dbh->prepare($req);
             $sth->execute (@words_param);
@@ -104,8 +103,7 @@ sub exec {
                 join playbot_chan pc on p.id = pc.content
                 where pc.chan = ?';
             $req .= ' and '.$words_sql if ($words_sql);
-            $req .= ' order by rand()
-                limit 1';
+            $req .= ' order by rand()';
 
             $sth = $dbh->prepare($req);
             $sth->execute($chan->[0], @words_param);
@@ -123,6 +121,9 @@ sub exec {
             return
         }
     }
+
+    # this is specific to the mysql driver
+    $rows = $sth->rows;
     
     $sth = $dbh->prepare("select tag
         from playbot_tags
@@ -145,7 +146,11 @@ sub exec {
     $content_h{'duration'} = $content->[4];
     $content_h{'tags'} = \@tags;
 
-    $irc->yield(privmsg => $chan => utils::print::print(\%content_h));
+    my $msg = utils::print::print(\%content_h);
+    $msg .= ' [' . $rows . ' résultat';
+    $msg .= 's' if ($rows > 1);
+    $msg .= ']';
+    $irc->yield(privmsg => $chan => $msg);
 
     # we save the get like a post
     my $sth2 = $dbh->prepare_cached('
