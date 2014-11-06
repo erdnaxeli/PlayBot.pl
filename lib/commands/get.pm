@@ -16,7 +16,7 @@ sub exec {
 
     # if we are in a query or arg -all, we search in all the channels
     my $all = 0;
-    $all = 1 if ($chan->[0] !~ /^#/ || $msg =~ s/-all//);
+    $all = 1 if ($chan->[0] !~ /^#/ || $msg =~ s/-a(ll)?//);
 
     my @tags = ($msg =~ /#([a-zA-Z0-9_-]+)/g);
     my $content;
