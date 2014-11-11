@@ -92,6 +92,7 @@ sub exec {
         if ($all) {
             $req = 'select id, sender, title, url, duration from playbot';
             $req .= ' where '.$words_sql if ($words_sql);
+            $req .= ' group by id';
             $req .= ' order by rand()';
 
             $sth = $dbh->prepare($req);
@@ -103,6 +104,7 @@ sub exec {
                 join playbot_chan pc on p.id = pc.content
                 where pc.chan = ?';
             $req .= ' and '.$words_sql if ($words_sql);
+            $req .= ' group by p.id';
             $req .= ' order by rand()';
 
             $sth = $dbh->prepare($req);
