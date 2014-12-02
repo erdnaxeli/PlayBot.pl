@@ -52,7 +52,7 @@ sub exec {
             $irc->yield(privmsg => $chan->[0] => $insultes[rand @insultes]);
         }
 	}
-	elsif ($msg =~ /^ *!later(?: (\S+))?(?: in (\d)+(h|m|s)?)? *$/) {
+	elsif ($msg =~ /^ *!later(?: (\S+))?(?: in (\d+)(h|m|s)?)? *$/) {
         my $index = $1;
         my ($time, $unit) = ($2, $3);
 
