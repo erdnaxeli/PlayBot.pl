@@ -41,13 +41,6 @@ sub exec {
             from playbot
             where id = ?');
         $sth->execute($words[0]);
-
-        $content = $sth->fetch;
-
-        if (!$content) {
-            $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
-            return
-        }
     }
     elsif (@tags) {
         my $params = join ', ' => ('?') x @tags;
@@ -80,13 +73,6 @@ sub exec {
             $sth = $dbh->prepare($req);
             $sth->execute(@tags, @words_param, $chan->[0], scalar @tags);
         }
-
-        $content = $sth->fetch;
-
-        if (!$content) {
-            $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
-            return
-        }
     }
     else {
         if ($all) {
@@ -110,18 +96,18 @@ sub exec {
             $sth = $dbh->prepare($req);
             $sth->execute($chan->[0], @words_param);
         }
+    }
 
-        $content = $sth->fetch;
-        
-        if (!$content) {
-            if (@words) {
-                $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
-            }
-            else {
-                $irc->yield(privmsg => $chan => "Poste d'abord du contenu, n00b.");
-            }
-            return
+    $content = $sth->fetch;
+
+    if (!$content) {
+        if (@words or @tags) {
+            $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
         }
+        else {
+            $irc->yield(privmsg => $chan => "Poste d'abord du contenu, n00b.");
+        }
+        return
     }
 
     # this is specific to the mysql driver
