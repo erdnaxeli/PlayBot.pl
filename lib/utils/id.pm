@@ -80,13 +80,32 @@ sub _get_from_offset {
 sub _test_if_exists {
     my ($index, $chan) = @_;
 
-    my $sth = $dbh->prepare('
-        SELECT content
-        FROM playbot_chan
-        WHERE content = ?
-        AND chan = ?
-        LIMIT 1
-    ');
+    my $sth;
+
+    # in query, we don't check chan
+    # this means that a user can indicate any id in query
+    if ($chan =~ /^#/) {
+         $sth = $dbh->prepare('
+            SELECT content
+            FROM playbot_chan
+            WHERE content = ?
+            AND chan = ?
+            LIMIT 1
+        ');
+
+        $sth->execute($index, $chan)
+            or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+    } else {
+        $sth = $dbh->prepare('
+            SELECT content
+            FROM playbot_chan
+            WHERE content = ?
+            LIMIT 1
+        ');
+
+        $sth->execute($index)
+            or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+    }
 
     $sth->execute($index, $chan)
         or $log->error("Couldn't finish transaction: " . $dbh->errstr);
