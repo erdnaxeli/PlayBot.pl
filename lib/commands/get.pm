@@ -27,14 +27,15 @@ sub exec {
     my $req;
     my $rows;
 
-    my @words = ($msg =~ /(?:^| )([a-zA-Z0-9_-]+)/g);
+    my @words = ($msg =~ /(?:^| )([\S]+)/g);
+    print "@words";
 
     if (not defined $last_req or $msg ne $last_req) {
         my $dbh = utils::db::get_session;
 
         my @words_param;
-        while ($msg =~ /(?:^| )([a-zA-Z0-9_-]+)/g) {
-            unshift @words_param, '%'.$1.'%';
+        foreach (@words) {
+            unshift @words_param, '%'.$_.'%';
         }
 
         my $words_sql;
