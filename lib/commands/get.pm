@@ -27,8 +27,9 @@ sub exec {
     my $req;
     my $rows;
 
-    my @words = ($msg =~ /(?:^| )([\S]+)/g);
-    print "@words";
+    my @words = ($msg =~ /(?:^| )([^#\s]+)/g);
+    print "@words\n";
+    print "@tags\n";
 
     if (not defined $last_req or $msg ne $last_req) {
         my $dbh = utils::db::get_session;
