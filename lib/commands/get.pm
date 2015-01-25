@@ -50,35 +50,37 @@ sub exec {
             $sth->execute($words[0]);
         }
         elsif (@tags) {
-            my $params = join ', ' => ('?') x @tags;
+            my @where;
+
+            foreach my $tag (@tags) {
+                unshift @where, 'p.id in (select pt.id from playbot_tags pt where pt.tag = ?)';
+            }
+
+            my $where = join ' and ' => @where;
 
             if ($all) {
                 $req = 'select id, sender, title, url, duration
                     from playbot
-                    natural join playbot_tags
-                    where tag in ('.$params.')';
+                    where '.$where;
                 $req .= ' and '.$words_sql if ($words_sql);
                 $req .= ' group by id
-                    having count(*) >= ?
                     order by rand()';
 
                 $sth = $dbh->prepare($req);
-                $sth->execute(@tags, @words_param, scalar @tags);
+                $sth->execute(@tags, @words_param);
             }
             else {
                 $req = 'select p.id, p.sender, p.title, p.url, duration
                     from playbot p
-                    natural join playbot_tags pt
                     join playbot_chan pc on p.id = pc.content
-                    where pt.tag in ('.$params.')';
+                    where '.$where;
                 $req .= ' and '.$words_sql if ($words_sql);
                 $req .= ' and pc.chan = ?
                     group by p.id
-                    having count(*) >= ?
                     order by rand()';
 
                 $sth = $dbh->prepare($req);
-                $sth->execute(@tags, @words_param, $chan->[0], scalar @tags);
+                $sth->execute(@tags, @words_param, $chan->[0]);
             }
         }
         else {
