@@ -2,6 +2,7 @@ package mixcloud;
 
 use LWP::UserAgent;
 use JSON;
+use Encode;
 
 sub get {
 	my ($url) = @_;
@@ -12,7 +13,7 @@ sub get {
 	my $response = $ua->get($url);
 	die($response->status_line) unless ($response->is_success);
 
-	$content = decode_json($response->decoded_content);
+	$content = decode_json(encode('UTF-8', $response->decoded_content));
 	$infos{'title'} = $content->{'name'};
 	$infos{'author'} = $content->{'user'}->{'name'};
 	$infos{'url'} = $content->{'url'};
