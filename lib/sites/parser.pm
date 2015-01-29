@@ -45,7 +45,6 @@ sub parse {
 	}
     elsif ($msg =~ m#(?:^|[^!])https?://www.dailymotion.com/video/([a-z0-9]+)#) {
         eval { %content = dailymotion::get($1) };
-        print $1."\n";
 
         $content{'site'} = 'dailymotion';
         $content{'url'} = 'https://www.dailymotion.com/video/' . $1;
