@@ -5,6 +5,7 @@ use youtube;
 use soundcloud;
 use mixcloud;
 use zippy;
+use dailymotion;
 
 use lib "$FindBin::Bin/lib/";
 use utils::print;
@@ -42,6 +43,13 @@ sub parse {
 		eval { %content = zippy::get($url) };
 		$content{'site'} = 'zippyshare';
 	}
+    elsif ($msg =~ m#(?:^|[^!])https?://www.dailymotion.com/video/([a-z0-9]+)#) {
+        eval { %content = dailymotion::get($1) };
+        print $1."\n";
+
+        $content{'site'} = 'dailymotion';
+        $content{'url'} = 'https://www.dailymotion.com/video/' . $1;
+    }
 
     # something goes wrong ?
     if ($@) {
