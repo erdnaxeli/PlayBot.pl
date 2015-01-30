@@ -9,9 +9,12 @@ use lib "$FindBin::Bin/lib";
 use commands::parser;
 use sites::parser;
 use utils::db;
+use utils::Logging;
 
 my $dbh = utils::db::get_session;
+my $log = Logging->new('STDOUT', 1);
 $sites::parser::dbh = $dbh;
+$sites::parser::log = $log;
 
 foreach (<>) {
     my $content = decode_json $_;
