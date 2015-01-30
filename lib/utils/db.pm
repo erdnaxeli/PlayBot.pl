@@ -4,11 +4,13 @@ use strict;
 use warnings;
 
 use JSON;
+use FindBin;
 
 my $conf;
 
 
 BEGIN {
+    chdir "$FindBin::Bin/";
     local $/;
     open CONF, '<', 'playbot.conf';
     my $json = <CONF>;
