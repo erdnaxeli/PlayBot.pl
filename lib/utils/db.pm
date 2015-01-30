@@ -3,6 +3,7 @@ package utils::db;
 use strict;
 use warnings;
 
+use DBI;
 use JSON;
 use FindBin;
 
@@ -19,7 +20,6 @@ BEGIN {
 
 
 sub get_session {
-    my ($irc) = POE::Component::IRC->spawn();
     my $dbh = DBI->connect('DBI:mysql:'.$conf->{'bdd'}.';host='.$conf->{'host'}, $conf->{'user'}, $conf->{'passwd'}, {
     	    PrintError => 0,
 	        AutoCommit => 1,
