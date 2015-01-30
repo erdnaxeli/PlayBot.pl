@@ -19,7 +19,7 @@ $sites::parser::log = $log;
 foreach (<>) {
     my $content = decode_json $_;
     foreach (keys %{$content}) {
-	    my $id = sites::parser::parse(undef, $content->{'author'}, ['@nightiies.facebook'], $content->{'link'});
-        commands::parser::tag($content->{'msg'}, ['@nightiies.facebook']);
+	    my $id = sites::parser::parse(undef, $content->{'author'}, ['#nightiies.facebook'], $content->{'link'});
+        commands::parser::tag($content->{'msg'}, ['#nightiies.facebook']);
     }
 }
