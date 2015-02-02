@@ -154,6 +154,9 @@ sub setConf
 
 # Au démarrage
 sub bot_start {
+    my $kernel = $_[KERNEL];
+    $kernel->alias_set('bot');
+
 	$irc->yield(register => "all");
 	$irc->yield(
 		connect => {
