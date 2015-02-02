@@ -5,6 +5,7 @@ use strict;
 use MIME::Parser;
 use URI::Encode;
 use JSON;
+use File::Temp qw/ tempfile /;
 
 sub get_txt_path {
     my $entity = shift;
@@ -46,11 +47,14 @@ sub get_content {
     return \%content;
 }
 
-my $message = <>;
+my ($fh, $filename) = tempfile('playbot' . time . '_XXXX', UNLINK => 0);
+while (<STDIN>) {
+    print $fh $_;
+}
 
 my $parser = new MIME::Parser;
 $parser->output_under('/tmp');
-my $entity = $parser->parse(\*STDIN);
+my $entity = $parser->parse_open($filename);
 
 my $txt_path = get_txt_path($entity);
 my $content = get_content($txt_path);
