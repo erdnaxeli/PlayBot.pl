@@ -70,7 +70,7 @@ if (my $pid = fork) {
     # parent
     # map READ to STDIN
     open(STDIN, "<&READ");
-    exec('ssh -i /usr/local/lib/playbot/key nightiies@perso.iiens.net ./PlayBot/tools/readjson.pl');
+    exec('ssh -i /usr/local/lib/playbot/key morignot2011@perso.iiens.net ./PlayBot/tools/readjson.pl');
 } else {
     # child
     print WRITE "$json\n";
