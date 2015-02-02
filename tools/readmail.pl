@@ -47,7 +47,7 @@ sub get_content {
     return \%content;
 }
 
-my ($fh, $filename) = tempfile('playbot' . time . '_XXXX', UNLINK => 0);
+my ($fh, $filename) = tempfile('playbot' . time . '_XXXX', UNLINK => 0, DIR => '/tmp');
 while (<STDIN>) {
     print $fh $_;
 }
