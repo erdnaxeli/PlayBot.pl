@@ -7,6 +7,7 @@ use FindBin;
 
 use lib "$FindBin::Bin/lib/";
 use sessions::irc;
+use sessions::facebook;
 
 # Boucle des events
 POE::Kernel->run();

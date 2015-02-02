@@ -3,23 +3,40 @@
 use strict;
 
 use JSON;
+use POE;
+use POE::Component::IKC::Client;
 use FindBin;
 
-use lib "$FindBin::Bin/lib";
-use commands::parser;
-use sites::parser;
-use utils::db;
-use utils::Logging;
+POE::Component::IKC::Client->spawn(
+    unix => "$FindBin::Bin/../playbot.sock",
+    name => "client-$$",
+    on_connect => \&on_connect
+);
 
-my $dbh = utils::db::get_session;
-my $log = Logging->new('STDOUT', 1);
-$sites::parser::dbh = $dbh;
-$sites::parser::log = $log;
+POE::Component::IKC::Responder->spawn();
+POE::Kernel->run();
+exit;
 
-foreach (<>) {
-    my $content = decode_json $_;
-    foreach (keys %{$content}) {
-	    my $id = sites::parser::parse(undef, $content->{'author'}, ['#nightiies.facebook'], $content->{'link'});
-        commands::parser::tag($content->{'msg'}, ['#nightiies.facebook']);
-    }
+sub on_connect {
+    POE::Session->create(
+        inline_states => {
+            _start => \&on_start,
+            send   => \&on_send
+        }
+    );
+}
+
+sub on_start {
+    print "start\n";
+    my $kernel = $_[KERNEL];
+
+    # we 'slurp' stdin
+    local $/;
+    my $json = <>;
+    my $content = decode_json $json;
+    print "$json\n";
+
+    # TODO: handle $content->{'msg'}
+    $kernel->post('IKC', 'post', 'poe://PlayBot/fbrecv/fbmsg', [ $content->{'author'}, $content->{'link'} ]);
+    $kernel->post('IKC', 'shutdown');
 }
