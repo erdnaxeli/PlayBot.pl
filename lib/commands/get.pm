@@ -30,7 +30,7 @@ sub exec {
     my @words = ($msg =~ /(?:^| )([^#\s]+)/g);
 
     if (not defined $last_req or $msg ne $last_req) {
-        my $dbh = utils::db::get_session;
+        my $dbh = utils::db::get_new_session;
 
         my @words_param;
         foreach (@words) {
@@ -129,7 +129,7 @@ sub exec {
     # this is specific to the mysql driver
     $rows = $sth->rows;
     
-    my $sth2 = utils::db::get_session()->prepare("select tag
+    my $sth2 = utils::db::get_new_session()->prepare("select tag
         from playbot_tags
         where id = ?
     ");
@@ -157,7 +157,7 @@ sub exec {
     $irc->yield(privmsg => $chan => $irc_msg);
 
     # we save the get like a post
-    $sth2 = utils::db::get_session()->prepare_cached('
+    $sth2 = utils::db::get_new_session()->prepare_cached('
         INSERT INTO playbot_chan (content, chan, sender_irc)
         VALUES (?,?,?)');
     $log->error("Couldn't prepare querie; aborting") unless (defined $sth2);
