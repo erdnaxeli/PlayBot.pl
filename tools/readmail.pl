@@ -41,7 +41,7 @@ sub get_content {
         } elsif (/#/ and not defined $content{'link'}) {
             # we check for tags before the link.
             # what is after is facebook craps.
-            $content{'msg'} .= $_;
+            $content{'msg'} .= chomp $_;
         }
     }
 
