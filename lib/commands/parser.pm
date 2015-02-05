@@ -21,7 +21,6 @@ sub setConf {
 
     $commands::fav::dbh = $dbhNew;
     $commands::tag::dbh = $dbhNew;
-    $commands::get::dbh = $dbhNew;
     $commands::later::dbh = $dbhNew;
     $utils::id::dbh = $dbhNew;
 
