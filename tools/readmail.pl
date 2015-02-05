@@ -38,9 +38,7 @@ sub get_content {
             $content{'author'} = $1;
         } elsif (/^https:\/\/l.facebook.com\/l\/.*\/(.*)/) {
             $content{'link'} .= ' '.$uri->decode($1);
-        } elsif (/#/ and not defined $content{'link'}) {
-            # we check for tags before the link.
-            # what is after is facebook craps.
+        } elsif (/#/) {
             chomp;
             $content{'msg'} .= $_;
         }
