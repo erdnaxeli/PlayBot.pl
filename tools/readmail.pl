@@ -31,12 +31,13 @@ sub get_content {
     open (my $fh, "<", $file);
 
     $content{'msg'} = '';
+    $content{'link'} = '';
 
     while (<$fh>) {
         if (/^(.*) posted in NightIIEs/) {
             $content{'author'} = $1;
         } elsif (/^https:\/\/l.facebook.com\/l\/.*\/(.*)/) {
-            $content{'link'} = $uri->decode($1);
+            $content{'link'} .= ' '.$uri->decode($1);
         } elsif (/#/ and not defined $content{'link'}) {
             # we check for tags before the link.
             # what is after is facebook craps.
