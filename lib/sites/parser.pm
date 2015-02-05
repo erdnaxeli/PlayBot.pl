@@ -85,20 +85,20 @@ sub parse {
 			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
 		    $id = $sth->fetch->[0];
-
-            # get tags
-            $sth = $dbh->prepare("select tag
-                from playbot_tags
-                where id = ?
-            ");
-            $sth->execute($id);
-
-            while (my $data = $sth->fetch) {
-                my $tag = $data->[0];
-                $tag =~ s/([a-zA-Z0-9_-]+)/#$1/;
-                push @tags, $tag;
-            }
 	    }
+
+        # get tags
+        $sth = $dbh->prepare("select tag
+            from playbot_tags
+            where id = ?
+            ");
+        $sth->execute($id);
+
+        while (my $data = $sth->fetch) {
+            my $tag = $data->[0];
+            $tag =~ s/([a-zA-Z0-9_-]+)/#$1/;
+            push @tags, $tag;
+        }
 
         # insertion du chan
         my $sth = $dbh->prepare_cached('
