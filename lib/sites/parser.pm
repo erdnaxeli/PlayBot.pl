@@ -8,10 +8,11 @@ use zippy;
 use dailymotion;
 
 use lib "$FindBin::Bin/lib/";
+use utils::db;
 use utils::print;
+use commands::parser;
 
 our $irc;
-our $dbh;
 our $log;
 
 sub parse {
@@ -20,6 +21,7 @@ sub parse {
 
     my %content;
     my $id;
+    my $dbh = utils::db::main_session();
 
     # parsing
     if ($msg =~ m#(?:^|[^!])https?://(?:www.youtube.com/watch\?[a-zA-Z0-9_=&-]*v=|youtu.be/)([a-zA-Z0-9_-]+)#) {
@@ -73,11 +75,14 @@ sub parse {
 			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 	    }
 
-        my @tags;
 	    # sélection de l'id de la vidéo insérée
         $id = $sth->{mysql_insertid};
 	    if (!$id) {
             # la vido avait déjà été insérée
+            # L'état de la bdd est stable (puisqu'on a en fait rien fait),
+            # on peut commiter.
+            $dbh->commit;
+
 		    my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
 		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
@@ -87,6 +92,21 @@ sub parse {
 		    $id = $sth->fetch->[0];
 	    }
 
+        # insertion du chan
+        my $sth = $dbh->prepare_cached('
+            INSERT INTO playbot_chan (content, chan, sender_irc)
+            VALUES (?,?,?)');
+		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+
+        $sth->execute($id, $chan->[0], $nick)
+            or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+
+        # in all cases, we commit now
+        $dbh->commit;
+
+        commands::parser::tag($msg, $chan);
+
+        my @tags;
         # get tags
         $sth = $dbh->prepare("select tag
             from playbot_tags
@@ -99,15 +119,7 @@ sub parse {
             $tag =~ s/([a-zA-Z0-9_-]+)/#$1/;
             push @tags, $tag;
         }
-
-        # insertion du chan
-        my $sth = $dbh->prepare_cached('
-            INSERT INTO playbot_chan (content, chan, sender_irc)
-            VALUES (?,?,?)');
-		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
-
-        $sth->execute($id, $chan->[0], $nick)
-            or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+        $dbh->commit;
 
         # message sur irc
         $content{'id'} = $id;

@@ -144,7 +144,6 @@ sub setConf
 {
     commands::parser::setConf($irc, $dbh, $log, \%lastID);
 
-    $sites::parser::dbh = $dbh;
     $sites::parser::irc = $irc;
     $sites::parser::log = $log;
 }
@@ -288,15 +287,7 @@ sub on_speak
     # first we test if it's a command
     if (!commands::parser::exec(@args)) {
         # if not, maybe there is an url we can parse
-	    my $id = sites::parser::parse(@args);
-
-        # if there is a new content, there is a new id to save
-        if ($id) {
-            $lastID{$chan->[0]} = $id;
-	    
-            # we insert the potiential tags
-            commands::parser::tag($msg, $chan);
-        }
+	    sites::parser::parse(@args);
     }	
 }
 
