@@ -117,7 +117,8 @@ sub tag {
     my ($msg, $chan) = @_;
     my @tags = ($msg =~ /#([a-zA-Z0-9_-]+)/g);
 
-    commands::tag::exec($lastID->{$chan->[0]}, "@tags");
+    my $id = utils::id::get($chan->[0]);
+    commands::tag::exec($id, "@tags");
 }
 
 1;
