@@ -37,6 +37,6 @@ sub on_start {
     print "$json\n";
 
     # TODO: handle $content->{'msg'}
-    $kernel->post('IKC', 'post', 'poe://PlayBot/fbrecv/fbmsg', [ $content->{'author'}, $content->{'link'} ]);
+    $kernel->post('IKC', 'post', 'poe://PlayBot/fbrecv/fbmsg', [ $content->{'author'}, $content->{'msg'} ]);
     $kernel->post('IKC', 'shutdown');
 }

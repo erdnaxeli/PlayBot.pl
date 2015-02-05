@@ -31,16 +31,15 @@ sub get_content {
     open (my $fh, "<", $file);
 
     $content{'msg'} = '';
-    $content{'link'} = '';
 
     while (<$fh>) {
         if (/^(.*) posted in NightIIEs/) {
             $content{'author'} = $1;
         } elsif (/^https:\/\/l.facebook.com\/l\/.*\/(.*)/) {
-            $content{'link'} .= ' '.$uri->decode($1);
+            $content{'msg'} .= ' '.$uri->decode($1);
         } elsif (/#/) {
             chomp;
-            $content{'msg'} .= $_;
+            $content{'msg'} .= ' '.$_;
         }
     }
 
