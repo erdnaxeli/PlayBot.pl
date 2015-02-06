@@ -2,6 +2,8 @@ package utils::print;
 
 use strict;
 
+use IRC::Utils qw(YELLOW ORANGE GREEN NORMAL LIGHT_BLUE GREY);
+
 # Used to print a content.
 # The public subroutine is print($content).
 # arg :
@@ -18,7 +20,7 @@ use strict;
 sub print {
     my ($content) = @_;
 
-    my $msg = '['.$content->{'id'}.'] '.$content->{'title'};
+    my $msg = YELLOW.'['.$content->{'id'}.'] '.GREEN.$content->{'title'};
 
 	if (defined $content->{'author'}) {
 		$msg .= ' | '.$content->{'author'};
@@ -29,18 +31,20 @@ sub print {
         my $m = int(($content->{'duration'} % 3600) / 60);
         my $s = int(($content->{'duration'} % 3600) % 60);
 
-        $msg .= ' (';
+        $msg .= LIGHT_BLUE.' (';
         $msg .= sprintf("%02d:", $h) if ($h > 0);
         $msg .= sprintf("%02d:", $m);
         $msg .= sprintf("%02d", $s);
-        $msg .= ')';
+        $msg .= ')'.NORMAL;
     }
 
-    $msg .= ' => '.$content->{'url'} if (defined $content->{'url'});
+    $msg .= ' => '.$content->{'url'}.ORANGE if (defined $content->{'url'});
 
     if (defined $content->{'tags'}) {
         $msg .= ' '.$_ foreach (@{$content->{'tags'}});
     }
+
+    $msg .= GREY;
 
     return $msg;
 }
