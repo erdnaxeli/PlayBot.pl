@@ -19,7 +19,7 @@ BEGIN {
 }
 
 sub main_session {
-    $dbh = get_new_session() if not $dbh;
+    $dbh = get_new_session() if (not $dbh or not $dbh->ping);
     return $dbh;
 }
 
