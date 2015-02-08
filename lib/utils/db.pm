@@ -30,6 +30,7 @@ sub get_new_session {
     	})
     	or die("Couldn't connect to database: ".DBI->errstr);
 
+    $dbh->do(qq{SET NAMES 'utf8';});
     return $dbh;
 }
 
