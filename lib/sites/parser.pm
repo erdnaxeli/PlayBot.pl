@@ -65,14 +65,20 @@ sub parse {
 	    }
 	    else {
 		    # insertion de la vidéo dans la bdd
-		    my $sth = $dbh->prepare_cached('
-                INSERT INTO playbot (type, url, sender, title, duration)
-                VALUES (?,?,?,?,?)');
-		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+            eval {
+                my $sth = $dbh->prepare_cached('
+                    INSERT INTO playbot (type, url, sender, title, duration)
+                    VALUES (?,?,?,?,?)');
+		        $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-		    $sth->execute($content{'site'}, $content{'url'},
-                $content{'author'}, $content{'title'}, $content{'duration'})
-			    or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+		        $sth->execute($content{'site'}, $content{'url'},
+                    $content{'author'}, $content{'title'}, $content{'duration'});
+
+                $dbh->commit;
+            };
+            if ($@) {
+			    $log->error("Couldn't finish transaction: " . $@);
+            }
 	    }
 
 	    # sélection de l'id de la vidéo insérée

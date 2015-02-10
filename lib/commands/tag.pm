@@ -17,12 +17,15 @@ sub addTag
 
     my $sth;
 
-    $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag)
-        VALUES (?, ?)');
-	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
+    $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
+    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-	$sth->execute($id, $tag)
-		or $log->error("Couldn't finish transaction: " . $dbh->errstr);
+    eval {
+        $sth->execute($id, $tag)
+    };
+	if ($@) {
+        $log->error("Couldn't finish transaction: " . $@);
+    }
 }
 
 1;
