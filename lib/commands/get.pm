@@ -66,7 +66,7 @@ sub exec {
 
             if ($query->is_global) {
                 $req = 'select id, sender, title, url, duration
-                    from playbot
+                    from playbot p
                     where '.$where;
                 $req .= ' and '.$words_sql if ($words_sql);
                 $req .= ' group by id
