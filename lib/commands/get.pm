@@ -6,15 +6,12 @@ use warnings;
 use lib "$FindBin::Bin/lib/";
 use utils::print;
 use utils::db;
+use utils::db::query;
 
 use commands::get::query;
 
 our $irc;
 our $log;
-
-my %last_req;
-my $dbh;
-my $sth;
 
 sub exec {
 	my ($kernel, $nick, $chan, $msg) = @_;
@@ -24,100 +21,12 @@ sub exec {
         query  => ($msg) ? $msg : ''
     );
 
-    my $content;
-    my $req;
-    my $rows;
-
-    if (not defined $last_req{$query->chan} or not ($query ~~ $last_req{$query->chan})) {
-        # we close a previous session if needed
-        if ($dbh) {
-            $sth->finish if $sth->{'Active'};
-            $dbh->commit;
-            $dbh->disconnect;
-        }
-
-        $dbh = utils::db::get_new_session;
-
-        my @words_param;
-        foreach (@{$query->words}) {
-            unshift @words_param, '%'.$_.'%';
-        }
-
-        my $words_sql;
-        foreach (@{$query->words}) {
-            $words_sql .= ' and ' if ($words_sql);
-            $words_sql .= "concat(sender, ' ', title) like ?";
-        }
-
-        if ($query->id >= 0) {
-            $sth = $dbh->prepare('select id, sender, title, url, duration
-                from playbot
-                where id = ?');
-            $sth->execute($query->id);
-        }
-        elsif (@{$query->tags}) {
-            my @where;
-
-            foreach my $tag (@{$query->tags}) {
-                unshift @where, 'p.id in (select pt.id from playbot_tags pt where pt.tag = ?)';
-            }
-
-            my $where = join ' and ' => @where;
-
-            if ($query->is_global) {
-                $req = 'select id, sender, title, url, duration
-                    from playbot p
-                    where '.$where;
-                $req .= ' and '.$words_sql if ($words_sql);
-                $req .= ' group by id
-                    order by rand()';
-
-                $sth = $dbh->prepare($req);
-                $sth->execute(@{$query->tags}, @words_param);
-            }
-            else {
-                $req = 'select p.id, p.sender, p.title, p.url, duration
-                    from playbot p
-                    join playbot_chan pc on p.id = pc.content
-                    where '.$where;
-                $req .= ' and '.$words_sql if ($words_sql);
-                $req .= ' and pc.chan = ?
-                    group by p.id
-                    order by rand()';
-
-                $sth = $dbh->prepare($req);
-                $sth->execute(@{$query->tags}, @words_param, $query->chan);
-            }
-        }
-        else {
-            if ($query->is_global) {
-                $req = 'select id, sender, title, url, duration from playbot';
-                $req .= ' where '.$words_sql if ($words_sql);
-                $req .= ' group by id';
-                $req .= ' order by rand()';
-
-                $sth = $dbh->prepare($req);
-                $sth->execute (@words_param);
-            }
-            else {
-                $req = 'select p.id, p.sender, p.title, p.url, duration
-                    from playbot p
-                    join playbot_chan pc on p.id = pc.content
-                    where pc.chan = ?';
-                $req .= ' and '.$words_sql if ($words_sql);
-                $req .= ' group by p.id';
-                $req .= ' order by rand()';
-
-                $sth = $dbh->prepare($req);
-                $sth->execute($query->chan, @words_param);
-            }
-        }
-    }
-
-    $content = $sth->fetch;
+    my $db_query = utils::db::query->new();
+    my $content = $db_query->get($query);
+    my $rows = $db_query->get_rows($query);
 
     if (!$content) {
-        if ($last_req{$query->chan} ~~ $query) {
+        if ($rows > 0) {
             # the request was already executed, there is nothing more
             $irc->yield(privmsg => $chan => "Tu tournes en rond, Jack !");
         }
@@ -128,21 +37,18 @@ sub exec {
             $irc->yield(privmsg => $chan => "Poste d'abord du contenu, n00b.");
         }
 
-        $last_req{$query->chan} = undef;
         return
     }
 
-    # this is specific to the mysql driver
-    $rows = $sth->rows;
-    
-    my $sth2 = utils::db::main_session()->prepare("select tag
+    my $dbh = utils::db::main_session();
+    my $sth = $dbh->prepare("select tag
         from playbot_tags
         where id = ?
     ");
-    $sth2->execute($content->[0]);
+    $sth->execute($content->[0]);
 
     my @tags;
-    while (my $data = $sth2->fetch) {
+    while (my $data = $sth->fetch) {
         my $tag = $data->[0];
         $tag =~ s/([a-zA-Z0-9_-]+)/#$1/;
         push @tags, $tag;
@@ -163,16 +69,15 @@ sub exec {
     $irc->yield(privmsg => $chan => $irc_msg);
 
     # we save the get like a post
-    $sth2 = utils::db::main_session()->prepare_cached('
+    $sth = $dbh->prepare_cached('
         INSERT INTO playbot_chan (content, chan, sender_irc)
         VALUES (?,?,?)');
-    $log->error("Couldn't prepare querie; aborting") unless (defined $sth2);
+    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
-    $sth2->execute($content->[0], $chan->[0], "PlayBot")
+    $sth->execute($content->[0], $chan->[0], "PlayBot")
         or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
-    # we save the request
-    $last_req{$query->chan} = $query;
+    $dbh->commit();
 
     return $content->[0];
 }
