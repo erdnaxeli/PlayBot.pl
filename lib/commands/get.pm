@@ -12,7 +12,7 @@ use commands::get::query;
 our $irc;
 our $log;
 
-my $last_req;
+my %last_req;
 my $dbh;
 my $sth;
 
@@ -28,7 +28,7 @@ sub exec {
     my $req;
     my $rows;
 
-    if (not defined $last_req or not ($query ~~ $last_req)) {
+    if (not defined $last_req{$query->chan} or not ($query ~~ $last_req{$query->chan})) {
         # we close a previous session if needed
         if ($dbh) {
             $sth->finish if $sth->{'Active'};
@@ -117,7 +117,7 @@ sub exec {
     $content = $sth->fetch;
 
     if (!$content) {
-        if ($last_req ~~ $query) {
+        if ($last_req{$query->chan} ~~ $query) {
             # the request was already executed, there is nothing more
             $irc->yield(privmsg => $chan => "Tu tournes en rond, Jack !");
         }
@@ -128,7 +128,7 @@ sub exec {
             $irc->yield(privmsg => $chan => "Poste d'abord du contenu, n00b.");
         }
 
-        $last_req = undef;
+        $last_req{$query->chan} = undef;
         return
     }
 
@@ -172,7 +172,7 @@ sub exec {
         or $log->error("Couldn't finish transaction: " . $dbh->errstr);
 
     # we save the request
-    $last_req = $query;
+    $last_req{$query->chan} = $query;
 
     return $content->[0];
 }
