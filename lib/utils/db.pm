@@ -25,7 +25,7 @@ sub main_session {
 
 sub get_new_session {
     my $dbh = DBI->connect('DBI:mysql:'.$conf->{'bdd'}.';host='.$conf->{'host'}, $conf->{'user'}, $conf->{'passwd'}, {
-            PrintError => 1,
+            RaiseError => 1,
 	        AutoCommit => 0
     	})
     	or die("Couldn't connect to database: ".DBI->errstr);
