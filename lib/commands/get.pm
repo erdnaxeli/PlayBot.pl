@@ -31,7 +31,27 @@ sub exec {
             $irc->yield(privmsg => $chan => "Tu tournes en rond, Jack !");
         }
         elsif (@{$query->words} or @{$query->tags}) {
-            $irc->yield(privmsg => $chan => "Je n'ai rien dans ce registre.");
+            $msg = "Je n'ai rien dans ce registre.";
+
+            if (not $query->is_global) {
+                # we check is there is result with global
+                my $q = commands::get::query->new(
+                    chan => $query->chan,
+                    query  => $query->query . ' -a'
+                );
+
+                my $rows = $db_query->get_rows($q);
+                if ($rows > 0) {
+                    $msg .= ' ' . $rows . ' résultat';
+                    $msg .= 's' if ($rows > 1);
+                    $msg .= ' trouvé';
+                    $msg .= 's' if ($rows > 1);
+                    $msg .= ' avec une recherche globale.';
+                }
+
+            }
+
+            $irc->yield(privmsg => $chan => $msg);
         }
         else {
             $irc->yield(privmsg => $chan => "Poste d'abord du contenu, n00b.");
