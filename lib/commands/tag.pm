@@ -17,7 +17,7 @@ sub addTag
 
     my $sth;
 
-    $sth = $dbh->prepare_cached('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
+    $sth = $dbh->prepare('INSERT INTO playbot_tags (id, tag) VALUES (?, ?)');
     $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
     eval {

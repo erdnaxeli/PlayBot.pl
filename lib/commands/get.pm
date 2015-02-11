@@ -89,7 +89,7 @@ sub exec {
     $irc->yield(privmsg => $chan => $irc_msg);
 
     # we save the get like a post
-    $sth = $dbh->prepare_cached('
+    $sth = $dbh->prepare('
         INSERT INTO playbot_chan (content, chan, sender_irc)
         VALUES (?,?,?)');
     $log->error("Couldn't prepare querie; aborting") unless (defined $sth);

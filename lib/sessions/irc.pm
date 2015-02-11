@@ -80,7 +80,7 @@ sub flux
 	my $date = strftime ("%Y-%m-%d", localtime(time - 3600*24));
 
     foreach (@channels) {
-	    my $sth = $dbh->prepare_cached('
+	    my $sth = $dbh->prepare('
             SELECT COUNT(*)
             FROM playbot p
             JOIN playbot_chan pc ON p.id = pc.content
@@ -103,7 +103,7 @@ sub later
 {
 	my ($nick, $id) = @_[ARG0,ARG1];
 
-	my $sth = $dbh->prepare_cached('SELECT url, sender, title FROM playbot WHERE id = ?');
+	my $sth = $dbh->prepare('SELECT url, sender, title FROM playbot WHERE id = ?');
 	$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
 	$sth->execute($id)
@@ -116,7 +116,7 @@ sub later
 		$irc->yield(privmsg => $nick => $donnees[0]);
     
         # save the content in the history
-        my $sth2 = $dbh->prepare_cached('
+        my $sth2 = $dbh->prepare('
             INSERT INTO playbot_chan (content, chan, sender_irc)
             VALUES (?,?,?)');
         $log->error("Couldn't prepare querie; aborting") unless (defined $sth2);
@@ -243,12 +243,12 @@ sub on_notice
 		$irc->yield(privmsg => $nickToVerify => "Il faut que ton pseudo soit enregistré auprès de NickServ");
 	}
 	else {
-		my $sth = $dbh->prepare_cached('SELECT user FROM playbot_codes WHERE code = ?');
+		my $sth = $dbh->prepare('SELECT user FROM playbot_codes WHERE code = ?');
 		$log->error("Counldn't prepare querie; aborting") unless (defined $sth);
 		$sth->execute($code);
 
 		if ($sth->rows) {
-			my $sth = $dbh->prepare_cached('UPDATE playbot_codes SET nick = ? WHERE code = ?');
+			my $sth = $dbh->prepare('UPDATE playbot_codes SET nick = ? WHERE code = ?');
 			$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
 			$sth->execute($nickToVerify, $code)

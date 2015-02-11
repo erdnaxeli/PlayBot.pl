@@ -66,7 +66,7 @@ sub parse {
 	    else {
 		    # insertion de la vidéo dans la bdd
             eval {
-                my $sth = $dbh->prepare_cached('
+                my $sth = $dbh->prepare('
                     INSERT INTO playbot (type, url, sender, title, duration)
                     VALUES (?,?,?,?,?)');
 		        $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
@@ -89,7 +89,7 @@ sub parse {
             # on peut commiter.
             $dbh->commit;
 
-		    my $sth = $dbh->prepare_cached('SELECT id FROM playbot WHERE url = ?');
+		    my $sth = $dbh->prepare('SELECT id FROM playbot WHERE url = ?');
 		    $log->error("Couldn't prepare querie; aborting") unless (defined $sth);
 
 		    $sth->execute($content{'url'})
@@ -99,7 +99,7 @@ sub parse {
 	    }
 
         # insertion du chan
-        my $sth = $dbh->prepare_cached('
+        my $sth = $dbh->prepare('
             INSERT INTO playbot_chan (content, chan, sender_irc)
             VALUES (?,?,?)');
 		$log->error("Couldn't prepare querie; aborting") unless (defined $sth);
