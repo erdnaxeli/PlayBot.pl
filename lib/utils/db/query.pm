@@ -72,7 +72,7 @@ sub _get_next {
 
     # there is no more data to fetch
     $self->_sth->{$chan} = undef;
-    $self->_dbh->{$chan}->commit();
+    $self->_get_dbh($chan)->commit();
     return undef;
 }
 
@@ -83,12 +83,9 @@ sub _init {
     if (defined $self->_sth->{$chan}) {
         $self->_sth->{$chan}->finish();
     }
-    elsif (not defined $self->_dbh->{$chan}) {
-        $self->_dbh->{$chan} = utils::db::get_new_session();
-    }
 
     my ($request, @args) = $self->_prepare_request($query);
-    my $sth = $self->_dbh->{$chan}->prepare($request);
+    my $sth = $self->_get_dbh($chan)->prepare($request);
     $sth->execute(@args);
 
     $self->_sth->{$query->chan} = $sth;
@@ -165,6 +162,18 @@ sub _prepare_request {
     }
 
     return ($req, @args);
+}
+
+sub _get_dbh {
+    my ($self, $chan) = @_;
+
+    if (not defined $self->_dbh->{$chan} or
+        not $self->_dbh->{$chan}->ping
+    ) {
+        $self->_dbh->{$chan} = utils::db::get_new_session();
+    }
+
+    return $self->_dbh->{$chan};
 }
 
 1;
