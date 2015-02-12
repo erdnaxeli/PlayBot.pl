@@ -8,7 +8,8 @@ PlayBot est un bot IRC permettant de manipuler des liens audio :
 + récupération et publication sur le chan des informations (titre, posteur) ;
 + normalisation du lien ;
 + sauvegarde de liens en favoris ;
-+ rappel du lien en query.
++ rappel du lien en query ;
++ recherche dans la base de données.
 
 
 ## Installation
@@ -25,7 +26,11 @@ PlayBot est codé en Perl. Il dépend des modules suivant :
 + HTML::Entities ;
 + POE ;
 + POE::Component::IRC ;
-+ Tie::File.
++ Tie::File ;
++ Moose.
++ Inline::Python
+
+Il utilise de plus la librairie Python [Weboob](http://weboob.org).
 
 
 ### Configuration
@@ -61,3 +66,4 @@ Les différentes commandes utilisables sont les suivantes sur le channel où se 
 + !fav [id] : enregistre en favoris le contenu possédant l'identifiant *id*. Si l'identifiant n'est pas préciser, le dernier contenu posté (et non inséré) est utilisé.
 + !later [id [in [Xs|Xm|Xs]]] : demande au PlayBot de rappeler en query un contenu. La durée par défaut est de 6h. Si l'identifant n'est pas précisé, le dernier contenu posté est utilisé.
 + !tag [id] #tag1 #tag2 … : permet de taguer un contenu.
++ !get [-a|-all] <query> : permet de chercher un contenu. La query peut être composée de tags ou de mots (alors cherché dans le titre et l'auteur du contenu). Sans l'option « -a », !get ne recherche que parmis les contenus postés sur le channel courant. En query l'option « -a » est implicite.
